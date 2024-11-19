@@ -1,70 +1,25 @@
-import { Pool } from "pg";
-
-// Configuración de la conexión con PostgreSQL utilizando la variable de entorno DATABASE_URL
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false, // Asegura la conexión SSL
-    },
-});
+import { sql } from "@vercel/postgres";
 
 // Handler para solicitudes POST
-export async function POST(request: Request): Promise<Response> {
+export async function POST(request: Request) {
     try {
-        const { humidity_value, location }: { humidity_value: number; location: string } =
-            await request.json();
+        // Parsear los datos del cuerpo de la solicitud
+        const { humidity_value, location } = await request.json();
 
-        if (
-            typeof humidity_value !== "number" ||
-            typeof location !== "string" ||
-            !location.trim()
-        ) {
-            return new Response("Datos inválidos: asegúrate de que todos los campos sean correctos", {
-                status: 400,
-            });
+        // Validar los datos recibidos
+        if (!humidity_value || !location) {
+            return new Response("Faltan campos requeridos", { status: 400 });
         }
 
-        const query = "INSERT INTO humedad (humidity_value, location) VALUES ($1, $2)";
-        const values = [humidity_value, location];
-        await pool.query(query, values);
+        // Insertar en la base de datos
+        await sql`
+            INSERT INTO humedad (humidity_value, location)
+            VALUES (${humidity_value}, ${location})
+        `;
 
         return new Response("Dato guardado con éxito", { status: 200 });
     } catch (error) {
-        console.error("❌ Error al guardar los datos:", (error as Error).message || error);
-        return new Response(
-            JSON.stringify({
-                error: "Error al guardar los datos",
-                details: (error as Error).message,
-            }),
-            {
-                status: 500,
-                headers: { "Content-Type": "application/json" },
-            }
-        );
-    }
-}
-
-// Handler para solicitudes GET
-export async function GET(): Promise<Response> {
-    try {
-        const query = "SELECT * FROM humedad ORDER BY timestamp DESC";
-        const result = await pool.query(query);
-
-        return new Response(JSON.stringify(result.rows), {
-            headers: { "Content-Type": "application/json" },
-            status: 200,
-        });
-    } catch (error) {
-        console.error("❌ Error al obtener los datos:", (error as Error).message || error);
-        return new Response(
-            JSON.stringify({
-                error: "Error al obtener los datos",
-                details: (error as Error).message,
-            }),
-            {
-                status: 500,
-                headers: { "Content-Type": "application/json" },
-            }
-        );
+        console.error("❌ Error al guardar los datos:", error);
+        return new Response("Error al guardar los datos", { status: 500 });
     }
 }
