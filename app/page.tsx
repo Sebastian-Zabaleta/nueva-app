@@ -2,8 +2,15 @@
 
 import { useState, useEffect } from "react";
 
+type HumidityData = {
+  id: number;
+  timestamp: string;
+  humidity_value: number;
+  location: string;
+};
+
 export default function Home() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<HumidityData[]>([]);
 
   useEffect(() => {
     // Llamada a la API para obtener los datos de la humedad
@@ -38,7 +45,7 @@ export default function Home() {
           </thead>
           <tbody>
             {data.length > 0 ? (
-              data.map((item: any) => (
+              data.map((item: HumidityData) => (
                 <tr key={item.id} className="hover:bg-gray-100">
                   <td className="border border-gray-300 px-4 py-2 text-center">{item.id}</td>
                   <td className="border border-gray-300 px-4 py-2 text-center">{new Date(item.timestamp).toLocaleString()}</td>
