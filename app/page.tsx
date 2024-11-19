@@ -13,7 +13,7 @@ export default function Home() {
   const [data, setData] = useState<HumidityData[]>([]);
   const [lastHumidity, setLastHumidity] = useState<number | null>(null);
 
-  useEffect(() => {
+  const fetchData = () => {
     fetch("/api/sensors")
       .then((response) => {
         if (!response.ok) {
@@ -33,6 +33,18 @@ export default function Home() {
         }
       })
       .catch((error) => console.error("Error:", error));
+  };
+
+  useEffect(() => {
+    fetchData();
+
+    // Configurar intervalo de actualización cada 5 segundos
+    const interval = setInterval(() => {
+      fetchData();
+    }, 5000);
+
+    // Limpiar el intervalo al desmontar el componente
+    return () => clearInterval(interval);
   }, []);
 
   const formatTimestamp = (timestamp: string) => {
