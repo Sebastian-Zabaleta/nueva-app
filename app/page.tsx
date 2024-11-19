@@ -11,6 +11,7 @@ interface HumidityData {
 
 export default function Home() {
   const [data, setData] = useState<HumidityData[]>([]);
+  const [lastHumidity, setLastHumidity] = useState<number | null>(null);
 
   useEffect(() => {
     fetch("/api/sensors")
@@ -25,6 +26,11 @@ export default function Home() {
           (a: HumidityData, b: HumidityData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
         setData(sortedData.slice(0, 5));
+
+        // Obtener la última lectura de humedad
+        if (sortedData.length > 0) {
+          setLastHumidity(sortedData[0].humidity_value);
+        }
       })
       .catch((error) => console.error("Error:", error));
   }, []);
@@ -45,7 +51,7 @@ export default function Home() {
       <h1 className="text-2xl sm:text-3xl font-bold text-center text-white mb-6">
         Últimas 5 Lecturas de Humedad
       </h1>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto mb-6">
         <table className="table-auto w-full bg-gray-900 text-white border border-gray-700">
           <thead>
             <tr>
@@ -80,6 +86,17 @@ export default function Home() {
           </tbody>
         </table>
       </div>
+      {lastHumidity !== null && (
+        <div
+          className={`p-4 text-center rounded-md font-bold ${
+            lastHumidity < 60
+              ? "bg-green-500 text-white"
+              : "bg-red-500 text-white"
+          }`}
+        >
+          {lastHumidity < 60 ? "Apto para jugar" : "No apto para jugar"}
+        </div>
+      )}
     </div>
   );
 }
