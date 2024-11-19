@@ -1,30 +1,23 @@
 import { sql } from "@vercel/postgres";
 
-export async function POST(request: Request) {
+export async function GET() {
     try {
-        // Obtener y registrar los datos recibidos
-        const data = await request.json();
-        console.log("Datos recibidos:", data); // Log para verificar qué datos están llegando
-
-        const { humidity_value, location } = data;
-
-        // Validar que los datos requeridos estén presentes
-        if (!humidity_value || !location) {
-            console.error("❌ Faltan campos requeridos:", { humidity_value, location });
-            return new Response("Faltan campos requeridos", { status: 400 });
-        }
-
-        // Insertar los datos en la base de datos
-        await sql`
-            INSERT INTO humedad (humidity_value, location)
-            VALUES (${humidity_value}, ${location})
+        // Obtener todos los datos de la tabla humedad
+        const { rows } = await sql`
+            SELECT * FROM humedad
+            ORDER BY timestamp DESC
         `;
 
-        console.log("✅ Dato guardado con éxito en la base de datos.");
-        return new Response("Dato guardado con éxito", { status: 200 });
+        console.log("✅ Datos obtenidos de la base de datos:", rows);
+
+        // Devolver los datos en formato JSON
+        return new Response(JSON.stringify(rows), {
+            headers: { "Content-Type": "application/json" },
+            status: 200,
+        });
     } catch (error) {
         // Registrar cualquier error ocurrido durante el proceso
-        console.error("❌ Error al guardar los datos:", error);
-        return new Response("Error al guardar los datos", { status: 500 });
+        console.error("❌ Error al obtener los datos:", error);
+        return new Response("Error al obtener los datos", { status: 500 });
     }
 }
