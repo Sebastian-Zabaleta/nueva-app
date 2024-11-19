@@ -1,9 +1,8 @@
-"use client"; // Necesario para usar hooks como useEffect
+"use client";
 
 import { useState, useEffect } from "react";
 
-// Define la estructura de los datos que esperas recibir
-interface SensorData {
+interface HumidityData {
   id: number;
   timestamp: string;
   humidity_value: number;
@@ -11,31 +10,27 @@ interface SensorData {
 }
 
 export default function Home() {
-  const [data, setData] = useState<SensorData[]>([]); // Especifica el tipo de datos del estado
+  const [data, setData] = useState<HumidityData[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("/api/sensors"); // Asegúrate de que esta ruta sea correcta
+    // Asegúrate de que esta URL sea correcta
+    fetch("/api/sensors")
+      .then((response) => {
         if (!response.ok) {
           throw new Error("Error al obtener los datos");
         }
-        const result: SensorData[] = await response.json(); // Define el tipo de los datos de la API
-        setData(result);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData(); // Llama a la función para obtener los datos
+        return response.json();
+      })
+      .then((data) => setData(data))
+      .catch((error) => console.error("Error:", error));
   }, []);
 
   return (
-    <div className="min-h-screen p-8">
-      <h1 className="text-2xl font-bold mb-4 text-center">Lecturas de Humedad</h1>
-      <table className="table-auto border-collapse border border-gray-300 w-full text-left">
+    <div className="min-h-screen bg-gray-100 p-8">
+      <h1 className="text-2xl font-bold text-center mb-6">Lecturas de Humedad</h1>
+      <table className="table-auto w-full bg-white border border-gray-300">
         <thead>
-          <tr className="bg-gray-200">
+          <tr>
             <th className="border border-gray-300 px-4 py-2">ID</th>
             <th className="border border-gray-300 px-4 py-2">Timestamp</th>
             <th className="border border-gray-300 px-4 py-2">Humedad</th>
@@ -54,7 +49,7 @@ export default function Home() {
             ))
           ) : (
             <tr>
-              <td className="border border-gray-300 px-4 py-2 text-center" colSpan={4}>
+              <td colSpan={4} className="text-center border border-gray-300 px-4 py-2">
                 No hay datos disponibles
               </td>
             </tr>
