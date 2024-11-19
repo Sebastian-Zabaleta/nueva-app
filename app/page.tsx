@@ -32,36 +32,43 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-800 p-8">
-      <h1 className="text-3xl font-bold text-center text-white mb-6">Últimas 5 Lecturas de Humedad</h1>
-      <table className="table-auto w-full bg-gray-900 text-white border border-gray-700">
-        <thead>
-          <tr>
-            <th className="border border-gray-700 px-4 py-2 text-gray-300">ID</th>
-            <th className="border border-gray-700 px-4 py-2 text-gray-300">Timestamp</th>
-            <th className="border border-gray-700 px-4 py-2 text-gray-300">Humedad</th>
-            <th className="border border-gray-700 px-4 py-2 text-gray-300">Ubicación</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.length > 0 ? (
-            data.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-700">
-                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.id}</td>
-                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.timestamp}</td>
-                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.humidity_value}</td>
-                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.location}</td>
-              </tr>
-            ))
-          ) : (
+    <div className="min-h-screen bg-gray-800 p-4 sm:p-8">
+      <h1 className="text-2xl sm:text-3xl font-bold text-center text-white mb-6">
+        Últimas 5 Lecturas de Humedad
+      </h1>
+      <div className="overflow-x-auto">
+        <table className="table-auto w-full bg-gray-900 text-white border border-gray-700">
+          <thead>
             <tr>
-              <td colSpan={4} className="text-center border border-gray-700 px-4 py-2 text-gray-400">
-                No hay datos disponibles
-              </td>
+              <th className="border border-gray-700 px-4 py-2 text-gray-300">ID</th>
+              <th className="border border-gray-700 px-4 py-2 text-gray-300">Timestamp</th>
+              <th className="border border-gray-700 px-4 py-2 text-gray-300">Humedad</th>
+              <th className="border border-gray-700 px-4 py-2 text-gray-300">Ubicación</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.length > 0 ? (
+              data.map((item) => (
+                <tr key={item.id} className="hover:bg-gray-700">
+                  <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.id}</td>
+                  <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.timestamp}</td>
+                  <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.humidity_value}</td>
+                  <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.location}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="text-center border border-gray-700 px-4 py-2 text-gray-400"
+                >
+                  No hay datos disponibles
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
