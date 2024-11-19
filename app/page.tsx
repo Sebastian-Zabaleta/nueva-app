@@ -26,30 +26,30 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-2xl font-bold text-center mb-6">Lecturas de Humedad</h1>
-      <table className="table-auto w-full bg-white border border-gray-300">
+    <div className="min-h-screen bg-gray-800 p-8">
+      <h1 className="text-3xl font-bold text-center text-white mb-6">Lecturas de Humedad</h1>
+      <table className="table-auto w-full bg-gray-900 text-white border border-gray-700">
         <thead>
           <tr>
-            <th className="border border-gray-300 px-4 py-2">ID</th>
-            <th className="border border-gray-300 px-4 py-2">Timestamp</th>
-            <th className="border border-gray-300 px-4 py-2">Humedad</th>
-            <th className="border border-gray-300 px-4 py-2">Ubicación</th>
+            <th className="border border-gray-700 px-4 py-2 text-gray-300">ID</th>
+            <th className="border border-gray-700 px-4 py-2 text-gray-300">Timestamp</th>
+            <th className="border border-gray-700 px-4 py-2 text-gray-300">Humedad</th>
+            <th className="border border-gray-700 px-4 py-2 text-gray-300">Ubicación</th>
           </tr>
         </thead>
         <tbody>
           {data.length > 0 ? (
             data.map((item) => (
-              <tr key={item.id}>
-                <td className="border border-gray-300 px-4 py-2">{item.id}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.timestamp}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.humidity_value}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.location}</td>
+              <tr key={item.id} className="hover:bg-gray-700">
+                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.id}</td>
+                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.timestamp}</td>
+                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.humidity_value}</td>
+                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.location}</td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={4} className="text-center border border-gray-300 px-4 py-2">
+              <td colSpan={4} className="text-center border border-gray-700 px-4 py-2 text-gray-400">
                 No hay datos disponibles
               </td>
             </tr>
