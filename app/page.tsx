@@ -21,13 +21,19 @@ export default function Home() {
         }
         return response.json();
       })
-      .then((data) => setData(data))
+      .then((data) => {
+        // Ordenar los datos por `timestamp` y obtener los últimos 5
+        const sortedData = data.sort(
+          (a: HumidityData, b: HumidityData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+        setData(sortedData.slice(0, 5));
+      })
       .catch((error) => console.error("Error:", error));
   }, []);
 
   return (
     <div className="min-h-screen bg-gray-800 p-8">
-      <h1 className="text-3xl font-bold text-center text-white mb-6">Lecturas de Humedad</h1>
+      <h1 className="text-3xl font-bold text-center text-white mb-6">Últimas 5 Lecturas de Humedad</h1>
       <table className="table-auto w-full bg-gray-900 text-white border border-gray-700">
         <thead>
           <tr>
