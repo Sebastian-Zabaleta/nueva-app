@@ -1,52 +1,57 @@
 import { sql } from "@vercel/postgres";
 
-// Handler para solicitudes POST
+// Log inicial para verificar que el archivo está cargado
+console.log("🚀 route.ts cargado correctamente");
+
 export async function POST(request: Request) {
+    console.log("📥 Solicitud POST recibida");
+
     try {
-        console.log("📥 Solicitud recibida en el endpoint /api/sensors");
-
-        // Extraer los datos del cuerpo de la solicitud
+        // Intentar extraer los datos del cuerpo de la solicitud
         const { humidity_value, location } = await request.json();
-        console.log(`Datos recibidos: Humedad=${humidity_value}, Ubicación=${location}`);
+        console.log("Datos recibidos:", { humidity_value, location });
 
-        // Validación básica
+        // Validar campos requeridos
         if (!humidity_value || !location) {
-            console.error("⚠️ Faltan campos requeridos");
+            console.error("⚠️ Faltan datos requeridos");
             return new Response("Faltan campos requeridos", { status: 400 });
         }
 
-        // Insertar los datos en la base de datos
+        // Intentar insertar datos en la base de datos
         await sql`INSERT INTO humedad (humidity_value, location) VALUES (${humidity_value}, ${location})`;
-        console.log("✅ Datos insertados correctamente en la base de datos");
+        console.log("✅ Datos guardados con éxito");
 
         // Responder con éxito
         return new Response("Dato guardado con éxito", { status: 200 });
     } catch (error) {
-        console.error("❌ Error al guardar los datos:", error);
+        // Captura de errores en la inserción de datos o lectura del cuerpo
+        console.error("❌ Error al procesar el POST:", error);
 
-        // Responder con un mensaje de error
-        return new Response("Error al guardar los datos", { status: 500 });
+        // Respuesta de error con información detallada
+        if (error instanceof SyntaxError) {
+            console.error("⚠️ Error de formato JSON:", error.message);
+            return new Response("Error en el formato de la solicitud", { status: 400 });
+        }
+
+        return new Response("Error al procesar la solicitud", { status: 500 });
     }
 }
 
-// Handler para solicitudes GET (opcional: listar los datos)
 export async function GET() {
+    console.log("📤 Solicitud GET recibida");
+
     try {
-        console.log("📤 Solicitud GET recibida en el endpoint /api/sensors");
-
-        // Consultar los datos en la tabla `humedad`
+        // Consultar la base de datos
         const { rows } = await sql`SELECT * FROM humedad ORDER BY timestamp DESC`;
-        console.log("✅ Datos obtenidos de la base de datos:", rows);
+        console.log("✅ Datos obtenidos:", rows);
 
-        // Devolver los datos en formato JSON
+        // Responder con los datos en formato JSON
         return new Response(JSON.stringify(rows), {
             headers: { "Content-Type": "application/json" },
             status: 200,
         });
     } catch (error) {
-        console.error("❌ Error al obtener los datos:", error);
-
-        // Responder con un mensaje de error
+        console.error("❌ Error al procesar el GET:", error);
         return new Response("Error al obtener los datos", { status: 500 });
     }
 }
