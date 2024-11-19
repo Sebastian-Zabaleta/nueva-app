@@ -9,15 +9,14 @@ const pool = new Pool({
 });
 
 // Handler para solicitudes POST
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<Response> {
     try {
-        // Parsear el cuerpo de la solicitud
-        const { humidity_value, location } = await request.json();
+        const { humidity_value, location }: { humidity_value: number; location: string } =
+            await request.json();
 
-        // Validación de datos
         if (
-            typeof humidity_value !== "number" || 
-            typeof location !== "string" || 
+            typeof humidity_value !== "number" ||
+            typeof location !== "string" ||
             !location.trim()
         ) {
             return new Response("Datos inválidos: asegúrate de que todos los campos sean correctos", {
@@ -25,18 +24,17 @@ export async function POST(request: Request) {
             });
         }
 
-        // Insertar datos en la base de datos usando el pool
         const query = "INSERT INTO humedad (humidity_value, location) VALUES ($1, $2)";
         const values = [humidity_value, location];
         await pool.query(query, values);
 
         return new Response("Dato guardado con éxito", { status: 200 });
-    } catch (error: any) {
-        console.error("❌ Error al guardar los datos:", error.message || error);
+    } catch (error) {
+        console.error("❌ Error al guardar los datos:", (error as Error).message || error);
         return new Response(
             JSON.stringify({
                 error: "Error al guardar los datos",
-                details: error.message,
+                details: (error as Error).message,
             }),
             {
                 status: 500,
@@ -47,9 +45,8 @@ export async function POST(request: Request) {
 }
 
 // Handler para solicitudes GET
-export async function GET() {
+export async function GET(): Promise<Response> {
     try {
-        // Obtener datos desde la base de datos usando el pool
         const query = "SELECT * FROM humedad ORDER BY timestamp DESC";
         const result = await pool.query(query);
 
@@ -57,12 +54,12 @@ export async function GET() {
             headers: { "Content-Type": "application/json" },
             status: 200,
         });
-    } catch (error: any) {
-        console.error("❌ Error al obtener los datos:", error.message || error);
+    } catch (error) {
+        console.error("❌ Error al obtener los datos:", (error as Error).message || error);
         return new Response(
             JSON.stringify({
                 error: "Error al obtener los datos",
-                details: error.message,
+                details: (error as Error).message,
             }),
             {
                 status: 500,
