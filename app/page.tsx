@@ -13,7 +13,6 @@ export default function Home() {
   const [data, setData] = useState<HumidityData[]>([]);
 
   useEffect(() => {
-    // Asegúrate de que esta URL sea correcta
     fetch("/api/sensors")
       .then((response) => {
         if (!response.ok) {
@@ -22,7 +21,6 @@ export default function Home() {
         return response.json();
       })
       .then((data) => {
-        // Ordenar los datos por `timestamp` y obtener los últimos 5
         const sortedData = data.sort(
           (a: HumidityData, b: HumidityData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
@@ -30,6 +28,17 @@ export default function Home() {
       })
       .catch((error) => console.error("Error:", error));
   }, []);
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const formattedDate = date.toLocaleDateString();
+    const formattedTime = date.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    return `${formattedDate} ${formattedTime}`;
+  };
 
   return (
     <div className="min-h-screen bg-gray-800 p-4 sm:p-8">
@@ -51,7 +60,9 @@ export default function Home() {
               data.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-700">
                   <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.id}</td>
-                  <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.timestamp}</td>
+                  <td className="border border-gray-700 px-4 py-2 text-gray-200">
+                    {formatTimestamp(item.timestamp)}
+                  </td>
                   <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.humidity_value}</td>
                   <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.location}</td>
                 </tr>
