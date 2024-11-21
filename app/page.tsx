@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 interface HumidityData {
   id: number;
   timestamp: string;
-  humidity_value: number | null; // Acepta valores numéricos o nulos
+  humidity_value: number | null;
   location: string;
 }
 
@@ -24,16 +24,18 @@ export default function Home() {
         return response.json();
       })
       .then((data: HumidityData[]) => {
-        const sortedData = data.sort(
-          (a: HumidityData, b: HumidityData) =>
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
+        const sortedData = data
+          .filter((item) => item.humidity_value !== null) // Validar datos no nulos
+          .sort(
+            (a: HumidityData, b: HumidityData) =>
+              new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          );
 
         // Obtener las últimas dos lecturas de la base de datos
         const lastTwo = sortedData.slice(0, 2);
 
         if (lastTwo.length === 2) {
-          const validValues = lastTwo.map((item) => Number(item.humidity_value)).filter((value) => !isNaN(value));
+          const validValues = lastTwo.map((item) => Number(item.humidity_value));
           if (validValues.length === 2) {
             const average = validValues.reduce((sum, value) => sum + value, 0) / validValues.length;
             setAverageHumidity(average);
@@ -68,7 +70,11 @@ export default function Home() {
         setLocation1Data(location1);
         setLocation2Data(location2);
       })
-      .catch((error) => console.error("Error:", error));
+      .catch((error) => {
+        console.error("Error al procesar los datos:", error);
+        setAverageHumidity(null);
+        setQuality("No disponible");
+      });
   };
 
   useEffect(() => {
