@@ -21,15 +21,19 @@ export default function Home() {
         }
         return response.json();
       })
-      .then((data) => {
+      .then((data: HumidityData[]) => {
         const sortedData = data.sort(
           (a: HumidityData, b: HumidityData) =>
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
 
         // Dividir los datos por ubicación
-        const location1 = sortedData.filter((item) => item.location === "ubicacion 1").slice(0, 5);
-        const location2 = sortedData.filter((item) => item.location === "ubicacion 2").slice(0, 5);
+        const location1 = sortedData
+          .filter((item: HumidityData) => item.location === "ubicacion 1")
+          .slice(0, 5);
+        const location2 = sortedData
+          .filter((item: HumidityData) => item.location === "ubicacion 2")
+          .slice(0, 5);
 
         setLocation1Data(location1);
         setLocation2Data(location2);
