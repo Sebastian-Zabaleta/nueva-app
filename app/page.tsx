@@ -40,7 +40,16 @@ export default function Home() {
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Calcular el promedio de las últimas 2 lecturas de ambas ubicaciones
+        // Calcular la condición de juego
+        let isPlayable = true;
+
+        if (location1.some((item) => item.humidity_value > 40) || location2.some((item) => item.humidity_value > 40)) {
+          isPlayable = false;
+        }
+
+        setPlayability(isPlayable ? "Apto para jugar" : "No apto para jugar");
+
+        // Calcular sugerencia de calzado basada en el promedio
         if (location1.length > 0 && location2.length > 0) {
           const averageHumidity1 =
             location1.reduce((sum, item) => sum + item.humidity_value, 0) /
@@ -51,7 +60,6 @@ export default function Home() {
 
           const overallAverage = (averageHumidity1 + averageHumidity2) / 2;
 
-          // Establecer sugerencia basada en el promedio
           if (overallAverage < 20) {
             setSuggestion("FG (Firm Ground)");
           } else if (overallAverage >= 20 && overallAverage < 40) {
@@ -59,9 +67,6 @@ export default function Home() {
           } else {
             setSuggestion("FS (Soft Ground)");
           }
-
-          // Establecer aptitud para jugar
-          setPlayability(overallAverage > 40 ? "No apto para jugar" : "Apto para jugar");
         }
       })
       .catch((error) => console.error("Error:", error));
