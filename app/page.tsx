@@ -30,33 +30,36 @@ export default function Home() {
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
 
-        // Dividir los datos por ubicación y seleccionar las últimas 5 lecturas
+        // Filtrar las últimas 5 lecturas por ubicación
         const location1 = sortedData.filter((item) => item.location === "ubicacion 1").slice(0, 5);
         const location2 = sortedData.filter((item) => item.location === "ubicacion 2").slice(0, 5);
 
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Calcular el promedio de humedad para determinar la sugerencia de calzado y la condición de juego
-        if (location1.length > 0 && location2.length > 0) {
-          const averageHumidity =
-            (location1.reduce((sum, item) => sum + item.humidity_value, 0) +
-              location2.reduce((sum, item) => sum + item.humidity_value, 0)) /
-            (location1.length + location2.length);
+        // Obtener la última lectura de cada ubicación
+        const lastReading1 = location1.length > 0 ? location1[0].humidity_value : null;
+        const lastReading2 = location2.length > 0 ? location2[0].humidity_value : null;
 
-          // Sugerencia de calzado
-          if (averageHumidity > 60) {
+        // Calcular la aptitud para jugar con base en las últimas lecturas
+        if (lastReading1 !== null && lastReading2 !== null) {
+          const overallAverage = (lastReading1 + lastReading2) / 2;
+
+          setPlayability(overallAverage > 40 ? "No apto para jugar" : "Apto para jugar");
+
+          // Determinar la sugerencia de calzado
+          if (overallAverage > 60) {
             setSuggestion("No jugar - FS (Soft Ground)");
-          } else if (averageHumidity < 20) {
+          } else if (overallAverage < 20) {
             setSuggestion("FG (Firm Ground)");
-          } else if (averageHumidity >= 20 && averageHumidity < 40) {
+          } else if (overallAverage >= 20 && overallAverage < 40) {
             setSuggestion("FS (Soft Ground)");
           } else {
             setSuggestion("FS (Soft Ground)");
           }
-
-          // Condición de juego
-          setPlayability(averageHumidity > 40 ? "No apto para jugar" : "Apto para jugar");
+        } else {
+          setPlayability("Datos insuficientes");
+          setSuggestion("Cargando...");
         }
       })
       .catch((error) => console.error("Error:", error));
