@@ -24,27 +24,28 @@ export default function Home() {
         return response.json();
       })
       .then((data: HumidityData[]) => {
-        // Filtrar por ubicación y ordenar por timestamp (más recientes primero)
+        // Filtrar y ordenar por ubicación
         const location1 = data
           .filter((item) => item.location === "ubicacion 1")
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-          .slice(0, 10); // Últimas 10 lecturas de ubicación 1
+          .slice(0, 5); // Seleccionar las últimas 5 lecturas de ubicación 1
 
         const location2 = data
           .filter((item) => item.location === "ubicacion 2")
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-          .slice(0, 10); // Últimas 10 lecturas de ubicación 2
+          .slice(0, 5); // Seleccionar las últimas 5 lecturas de ubicación 2
 
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Determinar la última lectura de cada ubicación
+        // Determinar el estado de juego y la sugerencia de calzado
         if (location1.length > 0 && location2.length > 0) {
           const lastHumidity1 = location1[0].humidity_value; // Última lectura de ubicación 1
           const lastHumidity2 = location2[0].humidity_value; // Última lectura de ubicación 2
 
-          // Condición de juego basada en las últimas lecturas
           const overallAverage = (lastHumidity1 + lastHumidity2) / 2;
+
+          // Condición de juego
           setPlayability(overallAverage > 40 ? "No apto para jugar" : "Apto para jugar");
 
           // Sugerencia de calzado
