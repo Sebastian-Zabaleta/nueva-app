@@ -24,31 +24,31 @@ export default function Home() {
         return response.json();
       })
       .then((data: HumidityData[]) => {
-        // Filtrar y ordenar por ubicación
+        // Filtrar y ordenar los datos por ubicación
         const location1 = data
           .filter((item) => item.location === "ubicacion 1")
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-          .slice(0, 5); // Seleccionar las últimas 5 lecturas de ubicación 1
+          .slice(0, 5); // Últimas 5 lecturas para ubicación 1
 
         const location2 = data
           .filter((item) => item.location === "ubicacion 2")
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-          .slice(0, 5); // Seleccionar las últimas 5 lecturas de ubicación 2
+          .slice(0, 5); // Últimas 5 lecturas para ubicación 2
 
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Determinar el estado de juego y la sugerencia de calzado
+        // Verificar la última lectura para determinar la condición de juego
         if (location1.length > 0 && location2.length > 0) {
-          const lastHumidity1 = location1[0].humidity_value; // Última lectura de ubicación 1
-          const lastHumidity2 = location2[0].humidity_value; // Última lectura de ubicación 2
+          const lastHumidity1 = location1[0].humidity_value; // Última lectura ubicación 1
+          const lastHumidity2 = location2[0].humidity_value; // Última lectura ubicación 2
 
           const overallAverage = (lastHumidity1 + lastHumidity2) / 2;
 
-          // Condición de juego
+          // Determinar la condición de juego
           setPlayability(overallAverage > 40 ? "No apto para jugar" : "Apto para jugar");
 
-          // Sugerencia de calzado
+          // Determinar la sugerencia de calzado
           if (overallAverage > 60) {
             setSuggestion("No jugar - FS (Soft Ground)");
           } else if (overallAverage < 20) {
@@ -69,7 +69,7 @@ export default function Home() {
   useEffect(() => {
     fetchData();
 
-    // Actualizar cada 5 segundos
+    // Configurar la actualización automática cada 5 segundos
     const interval = setInterval(() => {
       fetchData();
     }, 5000);
