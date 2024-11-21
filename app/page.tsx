@@ -29,13 +29,13 @@ export default function Home() {
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
 
-        // Dividir los datos por ubicación
+        // Dividir los datos por ubicación y seleccionar las últimas 5 lecturas
         const location1 = sortedData
           .filter((item: HumidityData) => item.location === "ubicacion 1")
-          .slice(0, 2); // Últimas 2 lecturas de ubicación 1
+          .slice(0, 5); // Últimas 5 lecturas de ubicación 1
         const location2 = sortedData
           .filter((item: HumidityData) => item.location === "ubicacion 2")
-          .slice(0, 2); // Últimas 2 lecturas de ubicación 2
+          .slice(0, 5); // Últimas 5 lecturas de ubicación 2
 
         setLocation1Data(location1);
         setLocation2Data(location2);
