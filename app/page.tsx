@@ -96,31 +96,35 @@ export default function Home() {
 
   const renderTable = (data: HumidityData[], title: string) => (
     <div className="overflow-x-auto mb-6 shadow-lg rounded-md">
-      <h2 className="text-xl font-bold text-center text-gray-800 bg-gray-200 py-2">{title}</h2>
-      <table className="table-auto w-full bg-white text-gray-800 border border-gray-300">
+      <h2 className="text-xl font-bold text-center text-white bg-green-600 py-2 rounded-t-md">
+        {title}
+      </h2>
+      <table className="table-auto w-full bg-gray-800 text-white border border-gray-700 rounded-b-md">
         <thead>
-          <tr className="bg-gray-100">
-            <th className="border border-gray-300 px-4 py-2">ID</th>
-            <th className="border border-gray-300 px-4 py-2">Timestamp</th>
-            <th className="border border-gray-300 px-4 py-2">Humedad</th>
-            <th className="border border-gray-300 px-4 py-2">Ubicación</th>
+          <tr className="bg-green-700">
+            <th className="border border-gray-600 px-4 py-2">ID</th>
+            <th className="border border-gray-600 px-4 py-2">Timestamp</th>
+            <th className="border border-gray-600 px-4 py-2">Humedad</th>
+            <th className="border border-gray-600 px-4 py-2">Ubicación</th>
           </tr>
         </thead>
         <tbody>
           {data.length > 0 ? (
             data.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-100">
-                <td className="border border-gray-300 px-4 py-2 text-center">{item.id}</td>
-                <td className="border border-gray-300 px-4 py-2 text-center">
+              <tr key={item.id} className="hover:bg-green-800">
+                <td className="border border-gray-600 px-4 py-2 text-center">{item.id}</td>
+                <td className="border border-gray-600 px-4 py-2 text-center">
                   {formatTimestamp(item.timestamp)}
                 </td>
-                <td className="border border-gray-300 px-4 py-2 text-center">{item.humidity_value}</td>
-                <td className="border border-gray-300 px-4 py-2 text-center">{item.location}</td>
+                <td className="border border-gray-600 px-4 py-2 text-center">
+                  {item.humidity_value}
+                </td>
+                <td className="border border-gray-600 px-4 py-2 text-center">{item.location}</td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={4} className="text-center border border-gray-300 px-4 py-2 text-gray-500">
+              <td colSpan={4} className="text-center border border-gray-600 px-4 py-2 text-gray-400">
                 No hay datos disponibles
               </td>
             </tr>
@@ -131,30 +135,32 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
-      <h1 className="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-6">
-        Últimas Lecturas de Humedad
+    <div className="min-h-screen bg-gray-900 p-4 sm:p-6 text-white">
+      <h1 className="text-2xl sm:text-3xl font-bold text-center text-green-500 mb-6">
+        Estado de la Cancha de Fútbol
       </h1>
 
       {renderTable(location1Data, "Lecturas Ubicación 1")}
       {renderTable(location2Data, "Lecturas Ubicación 2")}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <div className="p-4 bg-white shadow-lg rounded-md text-center">
+        <div className="p-4 bg-green-700 shadow-lg rounded-md text-center">
           <h2 className="text-lg font-bold mb-2">Promedio de Humedad</h2>
-          <p className="text-xl font-semibold text-gray-700">
-            {averageHumidity !== null ? `${averageHumidity.toFixed(2)}%` : "No disponible"}
-          </p>
+          {averageHumidity !== null ? (
+            <p className="text-xl font-semibold">{averageHumidity.toFixed(2)}%</p>
+          ) : (
+            <p>No hay datos suficientes para calcular el promedio.</p>
+          )}
         </div>
 
-        <div className="p-4 bg-white shadow-lg rounded-md text-center">
+        <div className="p-4 bg-green-700 shadow-lg rounded-md text-center">
           <h2 className="text-lg font-bold mb-2">Calidad de Juego</h2>
-          <p className="text-xl font-semibold text-gray-700">{quality}</p>
+          <p className="text-xl font-semibold">{quality}</p>
         </div>
 
-        <div className="p-4 bg-white shadow-lg rounded-md text-center">
+        <div className="p-4 bg-green-700 shadow-lg rounded-md text-center">
           <h2 className="text-lg font-bold mb-2">Tipo de Calzado</h2>
-          <p className="text-xl font-semibold text-gray-700">{footwear}</p>
+          <p className="text-xl font-semibold">{footwear}</p>
         </div>
       </div>
     </div>
