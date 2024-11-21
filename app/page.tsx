@@ -14,6 +14,7 @@ export default function Home() {
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
   const [averageHumidity, setAverageHumidity] = useState<number | null>(null);
   const [quality, setQuality] = useState<string>("No disponible");
+  const [footwear, setFootwear] = useState<string>("No disponible");
 
   const fetchData = async () => {
     try {
@@ -52,21 +53,27 @@ export default function Home() {
         // Determinar la calidad de juego
         if (average <= 20) {
           setQuality("Buena");
+          setFootwear("FG");
         } else if (average <= 40) {
           setQuality("Normal");
+          setFootwear("FS");
         } else if (average <= 60) {
           setQuality("Mala");
+          setFootwear("FS");
         } else {
           setQuality("Pésima");
+          setFootwear("FS");
         }
       } else {
         setAverageHumidity(null); // En caso de que haya menos de 2 registros
         setQuality("No disponible");
+        setFootwear("No disponible");
       }
     } catch (error) {
       console.error("Error:", error);
       setAverageHumidity(null); // Si ocurre un error, asegurarse de mostrar null
       setQuality("No disponible");
+      setFootwear("No disponible");
     }
   };
 
@@ -155,6 +162,12 @@ export default function Home() {
       <div className="mt-6 p-4 bg-gray-900 text-white rounded-md">
         <h2 className="text-lg font-bold mb-2">Calidad de Juego</h2>
         <p className="text-xl font-semibold">{quality}</p>
+      </div>
+
+      {/* Cuadro de calzado */}
+      <div className="mt-6 p-4 bg-gray-900 text-white rounded-md">
+        <h2 className="text-lg font-bold mb-2">Tipo de Calzado</h2>
+        <p className="text-xl font-semibold">{footwear}</p>
       </div>
     </div>
   );
