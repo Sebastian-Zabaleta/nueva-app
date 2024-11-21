@@ -12,8 +12,8 @@ interface HumidityData {
 export default function Home() {
   const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
-  const [suggestion, setSuggestion] = useState<string>("");
-  const [playability, setPlayability] = useState<string>("");
+  const [suggestion, setSuggestion] = useState<string>("Cargando...");
+  const [playability, setPlayability] = useState<string>("Cargando...");
 
   const fetchData = () => {
     fetch("/api/sensors")
@@ -26,8 +26,7 @@ export default function Home() {
       .then((data: HumidityData[]) => {
         // Ordenar por fecha y hora (más recientes primero)
         const sortedData = data.sort(
-          (a: HumidityData, b: HumidityData) =>
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
 
         // Filtrar las últimas 5 lecturas por ubicación
@@ -37,17 +36,16 @@ export default function Home() {
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Obtener la última lectura de cada ubicación
-        const lastReading1 = location1.length > 0 ? location1[0].humidity_value : null;
-        const lastReading2 = location2.length > 0 ? location2[0].humidity_value : null;
+        // Validar si hay lecturas para ambas ubicaciones
+        if (location1.length > 0 && location2.length > 0) {
+          const lastHumidity1 = location1[0].humidity_value; // Última lectura de ubicación 1
+          const lastHumidity2 = location2[0].humidity_value; // Última lectura de ubicación 2
 
-        // Calcular la aptitud para jugar con base en las últimas lecturas
-        if (lastReading1 !== null && lastReading2 !== null) {
-          const overallAverage = (lastReading1 + lastReading2) / 2;
-
+          // Determinar condición de juego
+          const overallAverage = (lastHumidity1 + lastHumidity2) / 2;
           setPlayability(overallAverage > 40 ? "No apto para jugar" : "Apto para jugar");
 
-          // Determinar la sugerencia de calzado
+          // Determinar sugerencia de calzado
           if (overallAverage > 60) {
             setSuggestion("No jugar - FS (Soft Ground)");
           } else if (overallAverage < 20) {
