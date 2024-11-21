@@ -12,8 +12,6 @@ interface HumidityData {
 export default function Home() {
   const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
-  const [suggestion, setSuggestion] = useState<string>("Cargando...");
-  const [playability, setPlayability] = useState<string>("Cargando...");
   const [lastReading, setLastReading] = useState<HumidityData | null>(null);
 
   const fetchData = () => {
@@ -30,44 +28,20 @@ export default function Home() {
           (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
 
-        // Tomar las últimas 10 lecturas de la base de datos
-        const last10Readings = sortedData.slice(0, 10);
-
         // Dividir las lecturas por ubicación
-        const location1 = last10Readings.filter((item) => item.location === "ubicacion 1");
-        const location2 = last10Readings.filter((item) => item.location === "ubicacion 2");
+        const location1 = sortedData
+          .filter((item) => item.location === "ubicacion 1")
+          .slice(0, 2); // Últimas 2 lecturas ubicación 1
+        const location2 = sortedData
+          .filter((item) => item.location === "ubicacion 2")
+          .slice(0, 2); // Últimas 2 lecturas ubicación 2
 
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Determinar la última lectura de humedad
+        // Determinar la última lectura global
         if (sortedData.length > 0) {
           setLastReading(sortedData[0]);
-        }
-
-        // Calcular la condición de juego
-        if (location1.length > 0 && location2.length > 0) {
-          const lastHumidity1 = location1[0]?.humidity_value || 0; // Última lectura ubicación 1
-          const lastHumidity2 = location2[0]?.humidity_value || 0; // Última lectura ubicación 2
-
-          const overallAverage = (lastHumidity1 + lastHumidity2) / 2;
-
-          // Determinar la condición de juego
-          setPlayability(overallAverage > 40 ? "No apto para jugar" : "Apto para jugar");
-
-          // Determinar la sugerencia de calzado
-          if (overallAverage > 60) {
-            setSuggestion("No jugar - FS (Soft Ground)");
-          } else if (overallAverage < 20) {
-            setSuggestion("FG (Firm Ground)");
-          } else if (overallAverage >= 20 && overallAverage < 40) {
-            setSuggestion("FS (Soft Ground)");
-          } else {
-            setSuggestion("FS (Soft Ground)");
-          }
-        } else {
-          setPlayability("Datos insuficientes");
-          setSuggestion("Cargando...");
         }
       })
       .catch((error) => console.error("Error:", error));
@@ -139,36 +113,6 @@ export default function Home() {
       <h1 className="text-2xl sm:text-3xl font-bold text-center text-white mb-6">
         Últimas Lecturas de Humedad
       </h1>
-
-      {/* Cuadro de sugerencia de calzado */}
-      <div className="mb-6">
-        <h2 className="text-lg font-bold text-white mb-2">Sugerencia de Calzado</h2>
-        <div
-          className={`p-4 text-center rounded-md font-bold ${
-            suggestion.includes("No jugar")
-              ? "bg-red-500 text-white"
-              : suggestion === "FG (Firm Ground)"
-              ? "bg-green-500 text-white"
-              : "bg-blue-500 text-white"
-          }`}
-        >
-          {suggestion || "Cargando..."}
-        </div>
-      </div>
-
-      {/* Cuadro de aptitud para jugar */}
-      <div className="mb-6">
-        <h2 className="text-lg font-bold text-white mb-2">Condición de Juego</h2>
-        <div
-          className={`p-4 text-center rounded-md font-bold ${
-            playability === "Apto para jugar"
-              ? "bg-green-500 text-white"
-              : "bg-red-500 text-white"
-          }`}
-        >
-          {playability || "Cargando..."}
-        </div>
-      </div>
 
       {/* Tablas de ubicación */}
       {renderTable(location1Data, "Lecturas Ubicación 1")}
