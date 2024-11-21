@@ -43,7 +43,7 @@ export default function Home() {
         const lastTwoReadings = sortedData.slice(0, 2); // Tomar los últimos dos elementos de toda la base de datos
         if (lastTwoReadings.length === 2) {
           const totalHumidity = lastTwoReadings.reduce(
-            (sum, item) => sum + (item.humidity_value || 0),
+            (sum, item) => sum + item.humidity_value,
             0
           );
           const average = totalHumidity / lastTwoReadings.length;
