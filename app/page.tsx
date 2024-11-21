@@ -12,7 +12,7 @@ interface HumidityData {
 export default function Home() {
   const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
-  const [lastReading, setLastReading] = useState<HumidityData | null>(null);
+  const [averageHumidity, setAverageHumidity] = useState<number | null>(null);
 
   const fetchData = () => {
     fetch("/api/sensors")
@@ -39,9 +39,14 @@ export default function Home() {
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Determinar la última lectura global
-        if (sortedData.length > 0) {
-          setLastReading(sortedData[0]);
+        // Calcular promedio de las humedades de ambas tablas
+        const allData = [...location1, ...location2];
+        if (allData.length > 0) {
+          const totalHumidity = allData.reduce((sum, item) => sum + item.humidity_value, 0);
+          const average = totalHumidity / allData.length;
+          setAverageHumidity(average);
+        } else {
+          setAverageHumidity(null);
         }
       })
       .catch((error) => console.error("Error:", error));
@@ -118,16 +123,15 @@ export default function Home() {
       {renderTable(location1Data, "Lecturas Ubicación 1")}
       {renderTable(location2Data, "Lecturas Ubicación 2")}
 
-      {/* Cuadro de última lectura */}
-      {lastReading && (
-        <div className="mt-6 p-4 bg-gray-900 text-white rounded-md">
-          <h2 className="text-lg font-bold mb-2">Última Lectura Registrada</h2>
-          <p>ID: {lastReading.id}</p>
-          <p>Timestamp: {formatTimestamp(lastReading.timestamp)}</p>
-          <p>Humedad: {lastReading.humidity_value}</p>
-          <p>Ubicación: {lastReading.location}</p>
-        </div>
-      )}
+      {/* Cuadro de promedio */}
+      <div className="mt-6 p-4 bg-gray-900 text-white rounded-md">
+        <h2 className="text-lg font-bold mb-2">Promedio de Humedad</h2>
+        {averageHumidity !== null ? (
+          <p className="text-xl font-semibold">{averageHumidity.toFixed(2)}%</p>
+        ) : (
+          <p>No hay datos suficientes para calcular el promedio.</p>
+        )}
+      </div>
     </div>
   );
 }
