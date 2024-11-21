@@ -13,6 +13,7 @@ export default function Home() {
   const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
   const [suggestion, setSuggestion] = useState<string>("");
+  const [playability, setPlayability] = useState<string>("");
 
   const fetchData = () => {
     fetch("/api/sensors")
@@ -45,9 +46,16 @@ export default function Home() {
             (location1[0].humidity_value + location2[0].humidity_value) / 2;
 
           // Establecer sugerencia basada en el promedio
-          setSuggestion(
-            averageHumidity < 60 ? "FG (Firm Ground)" : "FS (Soft Ground)"
-          );
+          if (averageHumidity < 20) {
+            setSuggestion("FG (Firm Ground)");
+          } else if (averageHumidity >= 20 && averageHumidity < 40) {
+            setSuggestion("FS (Soft Ground)");
+          } else {
+            setSuggestion("FS (Soft Ground)"); // Por defecto, FS para >40%
+          }
+
+          // Establecer aptitud para jugar
+          setPlayability(averageHumidity > 40 ? "No apto para jugar" : "Apto para jugar");
         }
       })
       .catch((error) => console.error("Error:", error));
@@ -121,7 +129,7 @@ export default function Home() {
         Últimas Lecturas de Humedad
       </h1>
 
-      {/* Pantalla de sugerencia */}
+      {/* Cuadro de sugerencia de calzado */}
       <div className="mb-6">
         <h2 className="text-lg font-bold text-white mb-2">Sugerencia de Calzado</h2>
         <div
@@ -132,6 +140,20 @@ export default function Home() {
           }`}
         >
           {suggestion || "Cargando..."}
+        </div>
+      </div>
+
+      {/* Cuadro de aptitud para jugar */}
+      <div className="mb-6">
+        <h2 className="text-lg font-bold text-white mb-2">Condición de Juego</h2>
+        <div
+          className={`p-4 text-center rounded-md font-bold ${
+            playability === "Apto para jugar"
+              ? "bg-green-500 text-white"
+              : "bg-red-500 text-white"
+          }`}
+        >
+          {playability || "Cargando..."}
         </div>
       </div>
 
