@@ -32,15 +32,15 @@ export default function Home() {
         // Dividir los datos por ubicación
         const location1 = sortedData
           .filter((item: HumidityData) => item.location === "ubicacion 1")
-          .slice(0, 5);
+          .slice(0, 2); // Últimas 2 lecturas de ubicación 1
         const location2 = sortedData
           .filter((item: HumidityData) => item.location === "ubicacion 2")
-          .slice(0, 5);
+          .slice(0, 2); // Últimas 2 lecturas de ubicación 2
 
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Calcular el promedio de las últimas 5 lecturas de ambas ubicaciones
+        // Calcular el promedio de las últimas 2 lecturas de ambas ubicaciones
         if (location1.length > 0 && location2.length > 0) {
           const averageHumidity1 =
             location1.reduce((sum, item) => sum + item.humidity_value, 0) /
