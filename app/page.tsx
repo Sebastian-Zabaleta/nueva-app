@@ -10,7 +10,6 @@ interface HumidityData {
 }
 
 export default function Home() {
-  const [data, setData] = useState<HumidityData[]>([]);
   const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
   const [suggestion, setSuggestion] = useState<string>("Cargando...");
@@ -38,7 +37,6 @@ export default function Home() {
         const location1 = last10Readings.filter((item) => item.location === "ubicacion 1");
         const location2 = last10Readings.filter((item) => item.location === "ubicacion 2");
 
-        setData(last10Readings);
         setLocation1Data(location1);
         setLocation2Data(location2);
 
