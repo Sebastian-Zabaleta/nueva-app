@@ -39,14 +39,14 @@ export default function Home() {
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Calcular promedio de las humedades de ambas tablas
-        const allData = [...location1, ...location2];
-        if (allData.length > 0) {
-          const totalHumidity = allData.reduce(
+        // Calcular promedio usando los últimos dos datos de la base de datos
+        const lastTwoReadings = [...location1, ...location2];
+        if (lastTwoReadings.length > 0) {
+          const totalHumidity = lastTwoReadings.reduce(
             (sum, item) => sum + (item.humidity_value || 0),
             0
           );
-          const average = totalHumidity / allData.length;
+          const average = totalHumidity / lastTwoReadings.length;
           setAverageHumidity(average);
         } else {
           setAverageHumidity(null);
