@@ -16,22 +16,51 @@ interface WeatherData {
   rain?: { "1h"?: number }; // Probabilidad de lluvia en la última hora (opcional)
 }
 
+interface RainForecast {
+  time: string;
+  rainProbability: number; // Precipitación pronosticada
+}
+
 const WeatherInfo = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [rainForecast, setRainForecast] = useState<RainForecast | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fetchWeather = async () => {
     try {
-      const response = await fetch(
+      // Clima actual
+      const weatherResponse = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=Fusagasuga&units=metric&appid=632aeff1481ee21399f979345e174e87`
       );
 
-      if (!response.ok) {
-        throw new Error("Error al obtener el clima");
+      if (!weatherResponse.ok) {
+        throw new Error("Error al obtener el clima actual");
       }
 
-      const data: WeatherData = await response.json();
-      setWeatherData(data);
+      const weatherData = await weatherResponse.json();
+      setWeatherData(weatherData);
+
+      // Pronóstico de lluvia
+      const forecastResponse = await fetch(
+        `https://api.openweathermap.org/data/2.5/forecast?q=Fusagasuga&units=metric&appid=632aeff1481ee21399f979345e174e87`
+      );
+
+      if (!forecastResponse.ok) {
+        throw new Error("Error al obtener el pronóstico de lluvia");
+      }
+
+      const forecastData = await forecastResponse.json();
+      const rainPrediction = forecastData.list.find((item: any) => item.rain && item.rain["3h"]);
+
+      if (rainPrediction) {
+        setRainForecast({
+          time: new Date(rainPrediction.dt * 1000).toLocaleTimeString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          rainProbability: rainPrediction.rain["3h"], // Precipitación acumulada en las próximas 3 horas
+        });
+      }
     } catch (err) {
       setError((err as Error).message);
     }
@@ -91,6 +120,22 @@ const WeatherInfo = () => {
             <div className="bg-blue-700 p-4 rounded-md shadow-md">
               <p className="text-sm font-light text-blue-300">
                 No se detecta lluvia reciente.
+              </p>
+            </div>
+          )}
+          {rainForecast ? (
+            <div className="bg-blue-600 p-4 rounded-md shadow-md">
+              <p className="text-xl font-bold text-blue-100">
+                {rainForecast.rainProbability.toFixed(2)} mm
+              </p>
+              <p className="text-sm font-light text-blue-300">
+                Lluvia pronosticada a las {rainForecast.time}
+              </p>
+            </div>
+          ) : (
+            <div className="bg-blue-600 p-4 rounded-md shadow-md">
+              <p className="text-sm font-light text-blue-300">
+                No hay lluvia pronosticada próximamente.
               </p>
             </div>
           )}
