@@ -24,14 +24,16 @@ export default function Home() {
         return response.json();
       })
       .then((data: HumidityData[]) => {
-        // Ordenar por fecha y hora (más recientes primero)
-        const sortedData = data.sort(
-          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
+        // Filtrar por ubicación y ordenar por timestamp (más recientes primero)
+        const location1 = data
+          .filter((item) => item.location === "ubicacion 1")
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, 5); // Últimas 5 lecturas de ubicación 1
 
-        // Filtrar las últimas 5 lecturas por ubicación
-        const location1 = sortedData.filter((item) => item.location === "ubicacion 1").slice(0, 5);
-        const location2 = sortedData.filter((item) => item.location === "ubicacion 2").slice(0, 5);
+        const location2 = data
+          .filter((item) => item.location === "ubicacion 2")
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, 5); // Últimas 5 lecturas de ubicación 2
 
         setLocation1Data(location1);
         setLocation2Data(location2);
