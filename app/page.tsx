@@ -5,14 +5,14 @@ import { useState, useEffect } from "react";
 interface HumidityData {
   id: number;
   timestamp: string;
-  humidity_value: number | null;
+  humidity_value: number;
   location: string;
 }
 
 export default function Home() {
   const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
-  const [averageHumidity, setAverageHumidity] = useState<string>("No disponible");
+  const [averageHumidity, setAverageHumidity] = useState<number | null>(null);
   const [quality, setQuality] = useState<string>("No disponible");
 
   const fetchData = async () => {
@@ -23,50 +23,33 @@ export default function Home() {
       }
       const data: HumidityData[] = await response.json();
 
-      console.log("Datos recibidos desde la API:", data);
-
-      if (!Array.isArray(data) || data.length === 0) {
-        console.warn("Datos no disponibles o no válidos");
-        setAverageHumidity("No disponible");
-        setQuality("No disponible");
-        return;
-      }
-
-      // Filtrar datos válidos
-      const validData = data.filter(
-        (item) => item.humidity_value !== null && !isNaN(item.humidity_value)
+      // Ordenar los datos por timestamp descendente
+      const sortedData = data.sort(
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
 
-      console.log("Datos válidos después de filtrar:", validData);
+      // Dividir las lecturas por ubicación
+      const location1 = sortedData
+        .filter((item) => item.location === "ubicacion 1")
+        .slice(0, 2); // Últimas 2 lecturas ubicación 1
+      const location2 = sortedData
+        .filter((item) => item.location === "ubicacion 2")
+        .slice(0, 2); // Últimas 2 lecturas ubicación 2
 
-      if (validData.length === 0) {
-        console.warn("No se encontraron datos válidos");
-        setAverageHumidity("No disponible");
-        setQuality("No disponible");
-        return;
-      }
+      setLocation1Data(location1);
+      setLocation2Data(location2);
 
-      // Ordenar datos por timestamp
-      const sortedData = validData.sort(
-        (a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      );
+      // Calcular promedio global usando los últimos dos registros generales
+      const lastTwoReadings = sortedData.slice(0, 2); // Tomar los últimos dos elementos de toda la base de datos
+      if (lastTwoReadings.length === 2) {
+        const totalHumidity = lastTwoReadings.reduce((sum, item) => {
+          const value = Number(item.humidity_value); // Asegurarse de convertir el valor a número
+          return sum + (isNaN(value) ? 0 : value); // Sumar solo si el valor es válido
+        }, 0);
+        const average = totalHumidity / lastTwoReadings.length;
+        setAverageHumidity(average);
 
-      console.log("Datos ordenados:", sortedData);
-
-      // Obtener las últimas dos lecturas
-      const lastTwo = sortedData.slice(0, 2);
-
-      console.log("Últimas dos lecturas:", lastTwo);
-
-      if (lastTwo.length === 2) {
-        const validValues = lastTwo.map((item) => item.humidity_value || 0);
-        const average =
-          validValues.reduce((sum, value) => sum + value, 0) / validValues.length;
-
-        setAverageHumidity(`${average.toFixed(2)}%`);
-
-        // Determinar calidad de juego
+        // Determinar la calidad de juego
         if (average <= 20) {
           setQuality("Buena");
         } else if (average <= 40) {
@@ -77,23 +60,12 @@ export default function Home() {
           setQuality("Pésima");
         }
       } else {
-        setAverageHumidity("No disponible");
+        setAverageHumidity(null); // En caso de que haya menos de 2 registros
         setQuality("No disponible");
       }
-
-      // Filtrar datos por ubicación
-      const location1 = sortedData
-        .filter((item) => item.location === "ubicacion 1")
-        .slice(0, 2);
-      const location2 = sortedData
-        .filter((item) => item.location === "ubicacion 2")
-        .slice(0, 2);
-
-      setLocation1Data(location1);
-      setLocation2Data(location2);
     } catch (error) {
-      console.error("Error al procesar los datos:", error);
-      setAverageHumidity("No disponible");
+      console.error("Error:", error);
+      setAverageHumidity(null); // Si ocurre un error, asegurarse de mostrar null
       setQuality("No disponible");
     }
   };
@@ -101,12 +73,24 @@ export default function Home() {
   useEffect(() => {
     fetchData();
 
+    // Configurar la actualización automática cada 5 segundos
     const interval = setInterval(() => {
       fetchData();
     }, 5000);
 
     return () => clearInterval(interval);
   }, []);
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const formattedDate = date.toLocaleDateString();
+    const formattedTime = date.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    return `${formattedDate} ${formattedTime}`;
+  };
 
   const renderTable = (data: HumidityData[], title: string) => (
     <div className="overflow-x-auto mb-6">
@@ -124,20 +108,12 @@ export default function Home() {
           {data.length > 0 ? (
             data.map((item) => (
               <tr key={item.id} className="hover:bg-gray-700">
+                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.id}</td>
                 <td className="border border-gray-700 px-4 py-2 text-gray-200">
-                  {item.id}
+                  {formatTimestamp(item.timestamp)}
                 </td>
-                <td className="border border-gray-700 px-4 py-2 text-gray-200">
-                  {new Date(item.timestamp).toLocaleString()}
-                </td>
-                <td className="border border-gray-700 px-4 py-2 text-gray-200">
-                  {item.humidity_value !== null
-                    ? `${item.humidity_value.toFixed(2)}%`
-                    : "N/A"}
-                </td>
-                <td className="border border-gray-700 px-4 py-2 text-gray-200">
-                  {item.location}
-                </td>
+                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.humidity_value}</td>
+                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.location}</td>
               </tr>
             ))
           ) : (
@@ -165,16 +141,20 @@ export default function Home() {
       {renderTable(location1Data, "Lecturas Ubicación 1")}
       {renderTable(location2Data, "Lecturas Ubicación 2")}
 
-      {/* Cuadro del promedio de humedad */}
-      <div className="mt-6 p-4 bg-gray-900 text-white rounded-md shadow-md">
-        <h2 className="text-lg font-bold">Promedio de Humedad</h2>
-        <p>{averageHumidity}</p>
+      {/* Cuadro de promedio */}
+      <div className="mt-6 p-4 bg-gray-900 text-white rounded-md">
+        <h2 className="text-lg font-bold mb-2">Promedio de Humedad</h2>
+        {averageHumidity !== null ? (
+          <p className="text-xl font-semibold">{averageHumidity.toFixed(2)}%</p>
+        ) : (
+          <p>No hay datos suficientes para calcular el promedio.</p>
+        )}
       </div>
 
-      {/* Cuadro de calidad de juego */}
-      <div className="mt-6 p-4 bg-gray-900 text-white rounded-md shadow-md">
-        <h2 className="text-lg font-bold">Calidad de Juego</h2>
-        <p>{quality}</p>
+      {/* Cuadro de calidad */}
+      <div className="mt-6 p-4 bg-gray-900 text-white rounded-md">
+        <h2 className="text-lg font-bold mb-2">Calidad de Juego</h2>
+        <p className="text-xl font-semibold">{quality}</p>
       </div>
     </div>
   );
