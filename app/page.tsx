@@ -78,12 +78,20 @@ const WeatherInfo = () => {
             </p>
             <p className="text-sm font-light text-blue-400">Viento</p>
           </div>
-          {weatherData.rain && weatherData.rain["1h"] !== undefined && (
-            <div>
-              <p className="text-2xl font-bold text-blue-200">
+          {weatherData.rain && weatherData.rain["1h"] !== undefined ? (
+            <div className="bg-blue-700 p-4 rounded-md shadow-md">
+              <p className="text-2xl font-bold text-blue-100">
                 {weatherData.rain["1h"]} mm
               </p>
-              <p className="text-sm font-light text-blue-400">Lluvia (últ. 1h)</p>
+              <p className="text-sm font-light text-blue-300">
+                Probabilidad de lluvia (última hora)
+              </p>
+            </div>
+          ) : (
+            <div className="bg-blue-700 p-4 rounded-md shadow-md">
+              <p className="text-sm font-light text-blue-300">
+                No hay datos de lluvia disponibles.
+              </p>
             </div>
           )}
         </div>
