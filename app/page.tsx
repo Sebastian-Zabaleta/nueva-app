@@ -13,6 +13,7 @@ interface WeatherData {
   weather: { description: string }[];
   main: { temp: number; humidity: number };
   wind: { speed: number };
+  rain?: { "1h"?: number }; // Probabilidad de lluvia en la última hora (opcional)
 }
 
 const WeatherInfo = () => {
@@ -77,6 +78,14 @@ const WeatherInfo = () => {
             </p>
             <p className="text-sm font-light text-blue-400">Viento</p>
           </div>
+          {weatherData.rain && weatherData.rain["1h"] !== undefined && (
+            <div>
+              <p className="text-2xl font-bold text-blue-200">
+                {weatherData.rain["1h"]} mm
+              </p>
+              <p className="text-sm font-light text-blue-400">Lluvia (últ. 1h)</p>
+            </div>
+          )}
         </div>
       ) : (
         <p className="text-blue-400 font-semibold">Cargando clima...</p>
