@@ -10,10 +10,62 @@ interface HumidityData {
 }
 
 interface WeatherData {
-  temperature: number;
-  description: string;
-  icon: string;
+  weather: { description: string }[];
+  main: { temp: number; humidity: number };
+  wind: { speed: number };
 }
+
+const WeatherInfo = () => {
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchWeather = async () => {
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=Fusagasuga&units=metric&appid=632aeff1481ee21399f979345e174e87`
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al obtener el clima");
+      }
+
+      const data: WeatherData = await response.json();
+      setWeatherData(data);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+
+  useEffect(() => {
+    fetchWeather();
+
+    const interval = setInterval(() => {
+      fetchWeather();
+    }, 600000); // Actualiza cada 10 minutos
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="p-4 bg-green-700 shadow-lg rounded-md mt-6 text-center text-white">
+      <h2 className="text-lg font-bold mb-2">Clima en Fusagasugá</h2>
+      {error ? (
+        <p className="text-red-500">{error}</p>
+      ) : weatherData ? (
+        <div>
+          <p className="text-xl font-semibold">
+            {weatherData.weather[0].description}
+          </p>
+          <p className="text-lg">Temperatura: {weatherData.main.temp}°C</p>
+          <p className="text-lg">Humedad: {weatherData.main.humidity}%</p>
+          <p className="text-lg">Viento: {weatherData.wind.speed} m/s</p>
+        </div>
+      ) : (
+        <p>Cargando clima...</p>
+      )}
+    </div>
+  );
+};
 
 export default function Home() {
   const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
@@ -21,7 +73,6 @@ export default function Home() {
   const [averageHumidity, setAverageHumidity] = useState<number | null>(null);
   const [quality, setQuality] = useState<string>("No disponible");
   const [footwear, setFootwear] = useState<string>("No disponible");
-  const [weather, setWeather] = useState<WeatherData | null>(null);
 
   const fetchData = async () => {
     try {
@@ -80,37 +131,12 @@ export default function Home() {
     }
   };
 
-  const fetchWeather = async () => {
-    try {
-      const apiKey = "T632aeff1481ee21399f979345e174e87"; // Reemplaza con tu API Key de OpenWeatherMap
-      const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=Fusagasuga,CO&appid=${apiKey}&units=metric`
-      );
-
-      if (!response.ok) {
-        throw new Error("Error al obtener los datos del clima");
-      }
-
-      const data = await response.json();
-
-      setWeather({
-        temperature: data.main.temp,
-        description: data.weather[0].description,
-        icon: `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`,
-      });
-    } catch (error) {
-      console.error("Error al obtener el clima:", error);
-    }
-  };
-
   useEffect(() => {
     fetchData();
-    fetchWeather();
 
     const interval = setInterval(() => {
       fetchData();
-      fetchWeather();
-    }, 600000); // Actualiza cada 10 minutos
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -196,24 +222,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Información del Clima */}
-      <div className="mt-6 p-4 bg-green-700 shadow-lg rounded-md text-center">
-        <h2 className="text-lg font-bold mb-2">Clima en Fusagasugá</h2>
-        {weather ? (
-          <div>
-            <p className="text-xl font-semibold">
-              {weather.temperature}°C - {weather.description}
-            </p>
-            <img
-              src={weather.icon}
-              alt="Icono del clima"
-              className="mx-auto mt-2"
-            />
-          </div>
-        ) : (
-          <p>Cargando datos del clima...</p>
-        )}
-      </div>
+      <WeatherInfo />
     </div>
   );
 }
