@@ -47,21 +47,39 @@ const WeatherInfo = () => {
   }, []);
 
   return (
-    <div className="p-4 bg-green-700 shadow-lg rounded-md mt-6 text-center text-white">
-      <h2 className="text-lg font-bold mb-2">Clima en Fusagasugá</h2>
+    <div className="p-4 bg-blue-800 shadow-lg rounded-md mt-6 text-center text-white">
+      <h2 className="text-lg font-bold mb-4 text-blue-300">Clima en Fusagasugá</h2>
       {error ? (
-        <p className="text-red-500">{error}</p>
+        <p className="text-red-500 font-semibold">{error}</p>
       ) : weatherData ? (
-        <div>
-          <p className="text-xl font-semibold">
-            {weatherData.weather[0].description}
-          </p>
-          <p className="text-lg">Temperatura: {weatherData.main.temp}°C</p>
-          <p className="text-lg">Humedad: {weatherData.main.humidity}%</p>
-          <p className="text-lg">Viento: {weatherData.wind.speed} m/s</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-center">
+          <div>
+            <p className="text-xl font-bold capitalize text-blue-200">
+              {weatherData.weather[0].description}
+            </p>
+            <p className="text-sm font-light text-blue-400">Condición</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-blue-200">
+              {weatherData.main.temp}°C
+            </p>
+            <p className="text-sm font-light text-blue-400">Temperatura</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-blue-200">
+              {weatherData.main.humidity}%
+            </p>
+            <p className="text-sm font-light text-blue-400">Humedad</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-blue-200">
+              {weatherData.wind.speed} m/s
+            </p>
+            <p className="text-sm font-light text-blue-400">Viento</p>
+          </div>
         </div>
       ) : (
-        <p>Cargando clima...</p>
+        <p className="text-blue-400 font-semibold">Cargando clima...</p>
       )}
     </div>
   );
