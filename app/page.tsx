@@ -42,14 +42,20 @@ export default function Home() {
         // Calcular promedio de las humedades de ambas tablas
         const allData = [...location1, ...location2];
         if (allData.length > 0) {
-          const totalHumidity = allData.reduce((sum, item) => sum + item.humidity_value, 0);
+          const totalHumidity = allData.reduce(
+            (sum, item) => sum + (item.humidity_value || 0),
+            0
+          );
           const average = totalHumidity / allData.length;
           setAverageHumidity(average);
         } else {
           setAverageHumidity(null);
         }
       })
-      .catch((error) => console.error("Error:", error));
+      .catch((error) => {
+        console.error("Error:", error);
+        setAverageHumidity(null); // Si ocurre un error, asegurarse de mostrar null
+      });
   };
 
   useEffect(() => {
