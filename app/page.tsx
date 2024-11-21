@@ -82,7 +82,7 @@ export default function Home() {
 
   const fetchWeather = async () => {
     try {
-      const apiKey = "TU_API_KEY"; // Reemplaza con tu API Key de OpenWeatherMap
+      const apiKey = "T632aeff1481ee21399f979345e174e87"; // Reemplaza con tu API Key de OpenWeatherMap
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=Fusagasuga,CO&appid=${apiKey}&units=metric`
       );
