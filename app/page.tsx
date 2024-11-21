@@ -10,10 +10,12 @@ interface HumidityData {
 }
 
 export default function Home() {
+  const [data, setData] = useState<HumidityData[]>([]);
   const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
   const [suggestion, setSuggestion] = useState<string>("Cargando...");
   const [playability, setPlayability] = useState<string>("Cargando...");
+  const [lastReading, setLastReading] = useState<HumidityData | null>(null);
 
   const fetchData = () => {
     fetch("/api/sensors")
@@ -24,24 +26,31 @@ export default function Home() {
         return response.json();
       })
       .then((data: HumidityData[]) => {
-        // Filtrar por ubicación y ordenar por timestamp descendente
-        const location1 = data
-          .filter((item) => item.location === "ubicacion 1")
-          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-          .slice(0, 5); // Obtener las últimas 5 lecturas de ubicación 1
+        // Ordenar por timestamp descendente
+        const sortedData = data.sort(
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
 
-        const location2 = data
-          .filter((item) => item.location === "ubicacion 2")
-          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-          .slice(0, 5); // Obtener las últimas 5 lecturas de ubicación 2
+        // Tomar las últimas 10 lecturas de la base de datos
+        const last10Readings = sortedData.slice(0, 10);
 
+        // Dividir las lecturas por ubicación
+        const location1 = last10Readings.filter((item) => item.location === "ubicacion 1");
+        const location2 = last10Readings.filter((item) => item.location === "ubicacion 2");
+
+        setData(last10Readings);
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Verificar la última lectura para determinar la condición de juego
+        // Determinar la última lectura de humedad
+        if (sortedData.length > 0) {
+          setLastReading(sortedData[0]);
+        }
+
+        // Calcular la condición de juego
         if (location1.length > 0 && location2.length > 0) {
-          const lastHumidity1 = location1[0].humidity_value; // Última lectura ubicación 1
-          const lastHumidity2 = location2[0].humidity_value; // Última lectura ubicación 2
+          const lastHumidity1 = location1[0]?.humidity_value || 0; // Última lectura ubicación 1
+          const lastHumidity2 = location2[0]?.humidity_value || 0; // Última lectura ubicación 2
 
           const overallAverage = (lastHumidity1 + lastHumidity2) / 2;
 
@@ -166,6 +175,17 @@ export default function Home() {
       {/* Tablas de ubicación */}
       {renderTable(location1Data, "Lecturas Ubicación 1")}
       {renderTable(location2Data, "Lecturas Ubicación 2")}
+
+      {/* Cuadro de última lectura */}
+      {lastReading && (
+        <div className="mt-6 p-4 bg-gray-900 text-white rounded-md">
+          <h2 className="text-lg font-bold mb-2">Última Lectura Registrada</h2>
+          <p>ID: {lastReading.id}</p>
+          <p>Timestamp: {formatTimestamp(lastReading.timestamp)}</p>
+          <p>Humedad: {lastReading.humidity_value}</p>
+          <p>Ubicación: {lastReading.location}</p>
+        </div>
+      )}
     </div>
   );
 }
