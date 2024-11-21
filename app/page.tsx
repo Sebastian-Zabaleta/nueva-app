@@ -40,16 +40,19 @@ export default function Home() {
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Calcular la condición de juego
+        // Calcular condición de juego
         let isPlayable = true;
 
-        if (location1.some((item) => item.humidity_value > 40) || location2.some((item) => item.humidity_value > 40)) {
+        if (
+          location1.some((item) => item.humidity_value > 40) ||
+          location2.some((item) => item.humidity_value > 40)
+        ) {
           isPlayable = false;
         }
 
         setPlayability(isPlayable ? "Apto para jugar" : "No apto para jugar");
 
-        // Calcular sugerencia de calzado basada en el promedio
+        // Calcular sugerencia de calzado
         if (location1.length > 0 && location2.length > 0) {
           const averageHumidity1 =
             location1.reduce((sum, item) => sum + item.humidity_value, 0) /
@@ -60,7 +63,9 @@ export default function Home() {
 
           const overallAverage = (averageHumidity1 + averageHumidity2) / 2;
 
-          if (overallAverage < 20) {
+          if (overallAverage > 60) {
+            setSuggestion("No jugar - FS (Soft Ground)");
+          } else if (overallAverage < 20) {
             setSuggestion("FG (Firm Ground)");
           } else if (overallAverage >= 20 && overallAverage < 40) {
             setSuggestion("FS (Soft Ground)");
@@ -145,7 +150,9 @@ export default function Home() {
         <h2 className="text-lg font-bold text-white mb-2">Sugerencia de Calzado</h2>
         <div
           className={`p-4 text-center rounded-md font-bold ${
-            suggestion === "FG (Firm Ground)"
+            suggestion.includes("No jugar")
+              ? "bg-red-500 text-white"
+              : suggestion === "FG (Firm Ground)"
               ? "bg-green-500 text-white"
               : "bg-blue-500 text-white"
           }`}
