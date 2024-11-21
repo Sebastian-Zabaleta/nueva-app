@@ -24,54 +24,39 @@ export default function Home() {
         return response.json();
       })
       .then((data: HumidityData[]) => {
+        // Ordenar por fecha y hora (más recientes primero)
         const sortedData = data.sort(
           (a: HumidityData, b: HumidityData) =>
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
 
         // Dividir los datos por ubicación y seleccionar las últimas 5 lecturas
-        const location1 = sortedData
-          .filter((item: HumidityData) => item.location === "ubicacion 1")
-          .slice(0, 5); // Últimas 5 lecturas de ubicación 1
-        const location2 = sortedData
-          .filter((item: HumidityData) => item.location === "ubicacion 2")
-          .slice(0, 5); // Últimas 5 lecturas de ubicación 2
+        const location1 = sortedData.filter((item) => item.location === "ubicacion 1").slice(0, 5);
+        const location2 = sortedData.filter((item) => item.location === "ubicacion 2").slice(0, 5);
 
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Calcular condición de juego
-        let isPlayable = true;
-
-        if (
-          location1.some((item) => item.humidity_value > 40) ||
-          location2.some((item) => item.humidity_value > 40)
-        ) {
-          isPlayable = false;
-        }
-
-        setPlayability(isPlayable ? "Apto para jugar" : "No apto para jugar");
-
-        // Calcular sugerencia de calzado
+        // Calcular el promedio de humedad para determinar la sugerencia de calzado y la condición de juego
         if (location1.length > 0 && location2.length > 0) {
-          const averageHumidity1 =
-            location1.reduce((sum, item) => sum + item.humidity_value, 0) /
-            location1.length;
-          const averageHumidity2 =
-            location2.reduce((sum, item) => sum + item.humidity_value, 0) /
-            location2.length;
+          const averageHumidity =
+            (location1.reduce((sum, item) => sum + item.humidity_value, 0) +
+              location2.reduce((sum, item) => sum + item.humidity_value, 0)) /
+            (location1.length + location2.length);
 
-          const overallAverage = (averageHumidity1 + averageHumidity2) / 2;
-
-          if (overallAverage > 60) {
+          // Sugerencia de calzado
+          if (averageHumidity > 60) {
             setSuggestion("No jugar - FS (Soft Ground)");
-          } else if (overallAverage < 20) {
+          } else if (averageHumidity < 20) {
             setSuggestion("FG (Firm Ground)");
-          } else if (overallAverage >= 20 && overallAverage < 40) {
+          } else if (averageHumidity >= 20 && averageHumidity < 40) {
             setSuggestion("FS (Soft Ground)");
           } else {
             setSuggestion("FS (Soft Ground)");
           }
+
+          // Condición de juego
+          setPlayability(averageHumidity > 40 ? "No apto para jugar" : "Apto para jugar");
         }
       })
       .catch((error) => console.error("Error:", error));
