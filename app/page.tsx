@@ -14,48 +14,45 @@ export default function Home() {
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
   const [averageHumidity, setAverageHumidity] = useState<number | null>(null);
 
-  const fetchData = () => {
-    fetch("/api/sensors")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Error al obtener los datos");
-        }
-        return response.json();
-      })
-      .then((data: HumidityData[]) => {
-        // Ordenar los datos por timestamp descendente
-        const sortedData = data.sort(
-          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
+  const fetchData = async () => {
+    try {
+      const response = await fetch("/api/sensors");
+      if (!response.ok) {
+        throw new Error("Error al obtener los datos");
+      }
+      const data: HumidityData[] = await response.json();
 
-        // Dividir las lecturas por ubicación
-        const location1 = sortedData
-          .filter((item) => item.location === "ubicacion 1")
-          .slice(0, 2); // Últimas 2 lecturas ubicación 1
-        const location2 = sortedData
-          .filter((item) => item.location === "ubicacion 2")
-          .slice(0, 2); // Últimas 2 lecturas ubicación 2
+      // Ordenar los datos por timestamp descendente
+      const sortedData = data.sort(
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
 
-        setLocation1Data(location1);
-        setLocation2Data(location2);
+      // Dividir las lecturas por ubicación
+      const location1 = sortedData
+        .filter((item) => item.location === "ubicacion 1")
+        .slice(0, 2); // Últimas 2 lecturas ubicación 1
+      const location2 = sortedData
+        .filter((item) => item.location === "ubicacion 2")
+        .slice(0, 2); // Últimas 2 lecturas ubicación 2
 
-        // Calcular promedio global usando los últimos dos registros generales
-        const lastTwoReadings = sortedData.slice(0, 2); // Tomar los últimos dos elementos de toda la base de datos
-        if (lastTwoReadings.length === 2) {
-          const totalHumidity = lastTwoReadings.reduce(
-            (sum, item) => sum + item.humidity_value,
-            0
-          );
-          const average = totalHumidity / lastTwoReadings.length;
-          setAverageHumidity(average);
-        } else {
-          setAverageHumidity(null); // En caso de que haya menos de 2 registros
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        setAverageHumidity(null); // Si ocurre un error, asegurarse de mostrar null
-      });
+      setLocation1Data(location1);
+      setLocation2Data(location2);
+
+      // Calcular promedio global usando los últimos dos registros generales
+      const lastTwoReadings = sortedData.slice(0, 2); // Tomar los últimos dos elementos de toda la base de datos
+      if (lastTwoReadings.length === 2) {
+        const totalHumidity = lastTwoReadings.reduce((sum, item) => {
+          return sum + (typeof item.humidity_value === "number" ? item.humidity_value : 0);
+        }, 0);
+        const average = totalHumidity / lastTwoReadings.length;
+        setAverageHumidity(average);
+      } else {
+        setAverageHumidity(null); // En caso de que haya menos de 2 registros
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setAverageHumidity(null); // Si ocurre un error, asegurarse de mostrar null
+    }
   };
 
   useEffect(() => {
