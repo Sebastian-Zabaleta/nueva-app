@@ -12,6 +12,8 @@ interface HumidityData {
 export default function Home() {
   const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
+  const [location1Suggestion, setLocation1Suggestion] = useState<string>("");
+  const [location2Suggestion, setLocation2Suggestion] = useState<string>("");
 
   const fetchData = () => {
     fetch("/api/sensors")
@@ -37,6 +39,18 @@ export default function Home() {
 
         setLocation1Data(location1);
         setLocation2Data(location2);
+
+        // Sugerencias de calzado basadas en la humedad más reciente
+        if (location1.length > 0) {
+          setLocation1Suggestion(
+            location1[0].humidity_value < 60 ? "FG (Firm Ground)" : "FS (Soft Ground)"
+          );
+        }
+        if (location2.length > 0) {
+          setLocation2Suggestion(
+            location2[0].humidity_value < 60 ? "FG (Firm Ground)" : "FS (Soft Ground)"
+          );
+        }
       })
       .catch((error) => console.error("Error:", error));
   };
@@ -108,7 +122,35 @@ export default function Home() {
       <h1 className="text-2xl sm:text-3xl font-bold text-center text-white mb-6">
         Últimas Lecturas de Humedad
       </h1>
+
+      <div className="mb-6">
+        <h2 className="text-lg font-bold text-white mb-2">Ubicación 1</h2>
+        <div
+          className={`p-4 text-center rounded-md font-bold ${
+            location1Suggestion === "FG (Firm Ground)"
+              ? "bg-green-500 text-white"
+              : "bg-blue-500 text-white"
+          }`}
+        >
+          {location1Suggestion}
+        </div>
+      </div>
+
       {renderTable(location1Data, "Lecturas Ubicación 1")}
+
+      <div className="mb-6">
+        <h2 className="text-lg font-bold text-white mb-2">Ubicación 2</h2>
+        <div
+          className={`p-4 text-center rounded-md font-bold ${
+            location2Suggestion === "FG (Firm Ground)"
+              ? "bg-green-500 text-white"
+              : "bg-blue-500 text-white"
+          }`}
+        >
+          {location2Suggestion}
+        </div>
+      </div>
+
       {renderTable(location2Data, "Lecturas Ubicación 2")}
     </div>
   );
