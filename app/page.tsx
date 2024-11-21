@@ -5,15 +5,15 @@ import { useState, useEffect } from "react";
 interface HumidityData {
   id: number;
   timestamp: string;
-  humidity_value: number;
+  humidity_value: number | null; // Acepta valores numéricos o nulos
   location: string;
 }
 
 export default function Home() {
   const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
-  const [averageHumidity, setAverageHumidity] = useState<number>(0);
-  const [quality, setQuality] = useState<string>("");
+  const [averageHumidity, setAverageHumidity] = useState<number | null>(null);
+  const [quality, setQuality] = useState<string>("No disponible");
 
   const fetchData = () => {
     fetch("/api/sensors")
@@ -33,23 +33,27 @@ export default function Home() {
         const lastTwo = sortedData.slice(0, 2);
 
         if (lastTwo.length === 2) {
-          const average =
-            lastTwo.reduce((sum, item) => sum + item.humidity_value, 0) /
-            lastTwo.length;
-          setAverageHumidity(average);
+          const validValues = lastTwo.map((item) => Number(item.humidity_value)).filter((value) => !isNaN(value));
+          if (validValues.length === 2) {
+            const average = validValues.reduce((sum, value) => sum + value, 0) / validValues.length;
+            setAverageHumidity(average);
 
-          // Determinar la calidad de juego según la humedad promedio
-          if (average <= 20) {
-            setQuality("Buena");
-          } else if (average <= 40) {
-            setQuality("Normal");
-          } else if (average <= 60) {
-            setQuality("Mala");
+            // Determinar la calidad de juego según la humedad promedio
+            if (average <= 20) {
+              setQuality("Buena");
+            } else if (average <= 40) {
+              setQuality("Normal");
+            } else if (average <= 60) {
+              setQuality("Mala");
+            } else {
+              setQuality("Pésima");
+            }
           } else {
-            setQuality("Pésima");
+            setAverageHumidity(null);
+            setQuality("No disponible");
           }
         } else {
-          setAverageHumidity(0);
+          setAverageHumidity(null);
           setQuality("No disponible");
         }
 
@@ -99,7 +103,7 @@ export default function Home() {
                   {new Date(item.timestamp).toLocaleString()}
                 </td>
                 <td className="border border-gray-700 px-4 py-2 text-gray-200">
-                  {item.humidity_value.toFixed(2)}%
+                  {item.humidity_value !== null ? `${item.humidity_value.toFixed(2)}%` : "N/A"}
                 </td>
                 <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.location}</td>
               </tr>
@@ -132,7 +136,7 @@ export default function Home() {
       {/* Cuadro del promedio de humedad */}
       <div className="mt-6 p-4 bg-gray-900 text-white rounded-md shadow-md">
         <h2 className="text-lg font-bold">Promedio de Humedad</h2>
-        <p>{averageHumidity.toFixed(2)}%</p>
+        <p>{averageHumidity !== null ? `${averageHumidity.toFixed(2)}%` : "N/A"}</p>
       </div>
 
       {/* Cuadro de calidad de juego */}
