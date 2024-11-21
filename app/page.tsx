@@ -24,35 +24,50 @@ export default function Home() {
         return response.json();
       })
       .then((data: HumidityData[]) => {
-        const sortedData = data
-          .filter((item) => item.humidity_value !== null) // Validar datos no nulos
-          .sort(
-            (a: HumidityData, b: HumidityData) =>
-              new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-          );
+        // Validar si data existe y no está vacío
+        if (!data || data.length === 0) {
+          console.warn("Datos no disponibles o vacíos");
+          setAverageHumidity(null);
+          setQuality("No disponible");
+          return;
+        }
+
+        // Filtrar datos válidos
+        const validData = data.filter(
+          (item) => item.humidity_value !== null && !isNaN(item.humidity_value)
+        );
+
+        if (validData.length === 0) {
+          console.warn("No se encontraron datos válidos");
+          setAverageHumidity(null);
+          setQuality("No disponible");
+          return;
+        }
+
+        const sortedData = validData.sort(
+          (a, b) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
 
         // Obtener las últimas dos lecturas de la base de datos
         const lastTwo = sortedData.slice(0, 2);
 
         if (lastTwo.length === 2) {
           const validValues = lastTwo.map((item) => Number(item.humidity_value));
-          if (validValues.length === 2) {
-            const average = validValues.reduce((sum, value) => sum + value, 0) / validValues.length;
-            setAverageHumidity(average);
+          const average =
+            validValues.reduce((sum, value) => sum + value, 0) /
+            validValues.length;
+          setAverageHumidity(average);
 
-            // Determinar la calidad de juego según la humedad promedio
-            if (average <= 20) {
-              setQuality("Buena");
-            } else if (average <= 40) {
-              setQuality("Normal");
-            } else if (average <= 60) {
-              setQuality("Mala");
-            } else {
-              setQuality("Pésima");
-            }
+          // Determinar la calidad de juego según la humedad promedio
+          if (average <= 20) {
+            setQuality("Buena");
+          } else if (average <= 40) {
+            setQuality("Normal");
+          } else if (average <= 60) {
+            setQuality("Mala");
           } else {
-            setAverageHumidity(null);
-            setQuality("No disponible");
+            setQuality("Pésima");
           }
         } else {
           setAverageHumidity(null);
@@ -61,10 +76,10 @@ export default function Home() {
 
         // Filtrar los datos por ubicación
         const location1 = sortedData
-          .filter((item: HumidityData) => item.location === "ubicacion 1")
+          .filter((item) => item.location === "ubicacion 1")
           .slice(0, 2); // Últimas 2 lecturas
         const location2 = sortedData
-          .filter((item: HumidityData) => item.location === "ubicacion 2")
+          .filter((item) => item.location === "ubicacion 2")
           .slice(0, 2); // Últimas 2 lecturas
 
         setLocation1Data(location1);
@@ -95,23 +110,35 @@ export default function Home() {
         <thead>
           <tr>
             <th className="border border-gray-700 px-4 py-2 text-gray-300">ID</th>
-            <th className="border border-gray-700 px-4 py-2 text-gray-300">Timestamp</th>
-            <th className="border border-gray-700 px-4 py-2 text-gray-300">Humedad</th>
-            <th className="border border-gray-700 px-4 py-2 text-gray-300">Ubicación</th>
+            <th className="border border-gray-700 px-4 py-2 text-gray-300">
+              Timestamp
+            </th>
+            <th className="border border-gray-700 px-4 py-2 text-gray-300">
+              Humedad
+            </th>
+            <th className="border border-gray-700 px-4 py-2 text-gray-300">
+              Ubicación
+            </th>
           </tr>
         </thead>
         <tbody>
           {data.length > 0 ? (
             data.map((item) => (
               <tr key={item.id} className="hover:bg-gray-700">
-                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.id}</td>
+                <td className="border border-gray-700 px-4 py-2 text-gray-200">
+                  {item.id}
+                </td>
                 <td className="border border-gray-700 px-4 py-2 text-gray-200">
                   {new Date(item.timestamp).toLocaleString()}
                 </td>
                 <td className="border border-gray-700 px-4 py-2 text-gray-200">
-                  {item.humidity_value !== null ? `${item.humidity_value.toFixed(2)}%` : "N/A"}
+                  {item.humidity_value !== null
+                    ? `${item.humidity_value.toFixed(2)}%`
+                    : "N/A"}
                 </td>
-                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.location}</td>
+                <td className="border border-gray-700 px-4 py-2 text-gray-200">
+                  {item.location}
+                </td>
               </tr>
             ))
           ) : (
