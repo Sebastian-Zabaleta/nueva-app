@@ -38,16 +38,16 @@ export default function Home() {
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Validar si hay lecturas para ambas ubicaciones
+        // Determinar la última lectura de cada ubicación
         if (location1.length > 0 && location2.length > 0) {
           const lastHumidity1 = location1[0].humidity_value; // Última lectura de ubicación 1
           const lastHumidity2 = location2[0].humidity_value; // Última lectura de ubicación 2
 
-          // Determinar condición de juego
+          // Condición de juego basada en las últimas lecturas
           const overallAverage = (lastHumidity1 + lastHumidity2) / 2;
           setPlayability(overallAverage > 40 ? "No apto para jugar" : "Apto para jugar");
 
-          // Determinar sugerencia de calzado
+          // Sugerencia de calzado
           if (overallAverage > 60) {
             setSuggestion("No jugar - FS (Soft Ground)");
           } else if (overallAverage < 20) {
@@ -68,12 +68,11 @@ export default function Home() {
   useEffect(() => {
     fetchData();
 
-    // Configurar intervalo de actualización cada 5 segundos
+    // Actualizar cada 5 segundos
     const interval = setInterval(() => {
       fetchData();
     }, 5000);
 
-    // Limpiar el intervalo al desmontar el componente
     return () => clearInterval(interval);
   }, []);
 
