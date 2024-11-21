@@ -11,7 +11,8 @@ interface HumidityData {
 
 export default function Home() {
   const [data, setData] = useState<HumidityData[]>([]);
-  const [lastHumidity, setLastHumidity] = useState<number | null>(null);
+  const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
+  const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
 
   const fetchData = () => {
     fetch("/api/sensors")
@@ -25,12 +26,15 @@ export default function Home() {
         const sortedData = data.sort(
           (a: HumidityData, b: HumidityData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
-        setData(sortedData.slice(0, 5));
 
-        // Obtener la última lectura de humedad
-        if (sortedData.length > 0) {
-          setLastHumidity(sortedData[0].humidity_value);
-        }
+        // Dividir los datos por ubicación
+        const location1 = sortedData.filter((item) => item.location === "ubicacion 1").slice(0, 5);
+        const location2 = sortedData.filter((item) => item.location === "ubicacion 2").slice(0, 5);
+
+        setLocation1Data(location1);
+        setLocation2Data(location2);
+
+        setData(sortedData);
       })
       .catch((error) => console.error("Error:", error));
   };
@@ -58,57 +62,52 @@ export default function Home() {
     return `${formattedDate} ${formattedTime}`;
   };
 
+  const renderTable = (data: HumidityData[], title: string) => (
+    <div className="overflow-x-auto mb-6">
+      <h2 className="text-xl font-bold text-center text-white mb-4">{title}</h2>
+      <table className="table-auto w-full bg-gray-900 text-white border border-gray-700">
+        <thead>
+          <tr>
+            <th className="border border-gray-700 px-4 py-2 text-gray-300">ID</th>
+            <th className="border border-gray-700 px-4 py-2 text-gray-300">Timestamp</th>
+            <th className="border border-gray-700 px-4 py-2 text-gray-300">Humedad</th>
+            <th className="border border-gray-700 px-4 py-2 text-gray-300">Ubicación</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.length > 0 ? (
+            data.map((item) => (
+              <tr key={item.id} className="hover:bg-gray-700">
+                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.id}</td>
+                <td className="border border-gray-700 px-4 py-2 text-gray-200">
+                  {formatTimestamp(item.timestamp)}
+                </td>
+                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.humidity_value}</td>
+                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.location}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td
+                colSpan={4}
+                className="text-center border border-gray-700 px-4 py-2 text-gray-400"
+              >
+                No hay datos disponibles
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-800 p-4 sm:p-8">
       <h1 className="text-2xl sm:text-3xl font-bold text-center text-white mb-6">
-        Últimas 5 Lecturas de Humedad
+        Últimas Lecturas de Humedad
       </h1>
-      <div className="overflow-x-auto mb-6">
-        <table className="table-auto w-full bg-gray-900 text-white border border-gray-700">
-          <thead>
-            <tr>
-              <th className="border border-gray-700 px-4 py-2 text-gray-300">ID</th>
-              <th className="border border-gray-700 px-4 py-2 text-gray-300">Timestamp</th>
-              <th className="border border-gray-700 px-4 py-2 text-gray-300">Humedad</th>
-              <th className="border border-gray-700 px-4 py-2 text-gray-300">Ubicación</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.length > 0 ? (
-              data.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-700">
-                  <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.id}</td>
-                  <td className="border border-gray-700 px-4 py-2 text-gray-200">
-                    {formatTimestamp(item.timestamp)}
-                  </td>
-                  <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.humidity_value}</td>
-                  <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.location}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={4}
-                  className="text-center border border-gray-700 px-4 py-2 text-gray-400"
-                >
-                  No hay datos disponibles
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      {lastHumidity !== null && (
-        <div
-          className={`p-4 text-center rounded-md font-bold ${
-            lastHumidity < 60
-              ? "bg-green-500 text-white"
-              : "bg-red-500 text-white"
-          }`}
-        >
-          {lastHumidity < 60 ? "Apto para jugar" : "No apto para jugar"}
-        </div>
-      )}
+      {renderTable(location1Data, "Lecturas Ubicación 1")}
+      {renderTable(location2Data, "Lecturas Ubicación 2")}
     </div>
   );
 }
