@@ -23,7 +23,7 @@ export default function Home() {
         return response.json();
       })
       .then((data: HumidityData[]) => {
-        // Ordenar por timestamp descendente
+        // Ordenar los datos por timestamp descendente
         const sortedData = data.sort(
           (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
@@ -39,9 +39,9 @@ export default function Home() {
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Calcular promedio usando los últimos dos datos de la base de datos
-        const lastTwoReadings = [...location1, ...location2];
-        if (lastTwoReadings.length > 0) {
+        // Calcular promedio global usando los últimos dos registros generales
+        const lastTwoReadings = sortedData.slice(0, 2); // Tomar los últimos dos elementos de toda la base de datos
+        if (lastTwoReadings.length === 2) {
           const totalHumidity = lastTwoReadings.reduce(
             (sum, item) => sum + (item.humidity_value || 0),
             0
@@ -49,7 +49,7 @@ export default function Home() {
           const average = totalHumidity / lastTwoReadings.length;
           setAverageHumidity(average);
         } else {
-          setAverageHumidity(null);
+          setAverageHumidity(null); // En caso de que haya menos de 2 registros
         }
       })
       .catch((error) => {
