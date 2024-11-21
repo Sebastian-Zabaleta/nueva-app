@@ -10,7 +10,6 @@ interface HumidityData {
 }
 
 export default function Home() {
-  const [data, setData] = useState<HumidityData[]>([]);
   const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
 
@@ -24,7 +23,8 @@ export default function Home() {
       })
       .then((data) => {
         const sortedData = data.sort(
-          (a: HumidityData, b: HumidityData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          (a: HumidityData, b: HumidityData) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
 
         // Dividir los datos por ubicación
@@ -33,8 +33,6 @@ export default function Home() {
 
         setLocation1Data(location1);
         setLocation2Data(location2);
-
-        setData(sortedData);
       })
       .catch((error) => console.error("Error:", error));
   };
