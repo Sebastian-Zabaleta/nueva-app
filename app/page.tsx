@@ -42,7 +42,8 @@ export default function Home() {
       const lastTwoReadings = sortedData.slice(0, 2); // Tomar los últimos dos elementos de toda la base de datos
       if (lastTwoReadings.length === 2) {
         const totalHumidity = lastTwoReadings.reduce((sum, item) => {
-          return sum + (typeof item.humidity_value === "number" ? item.humidity_value : 0);
+          const value = Number(item.humidity_value); // Asegurarse de convertir el valor a número
+          return sum + (isNaN(value) ? 0 : value); // Sumar solo si el valor es válido
         }, 0);
         const average = totalHumidity / lastTwoReadings.length;
         setAverageHumidity(average);
