@@ -28,12 +28,12 @@ export default function Home() {
         const location1 = data
           .filter((item) => item.location === "ubicacion 1")
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-          .slice(0, 5); // Últimas 5 lecturas de ubicación 1
+          .slice(0, 10); // Últimas 10 lecturas de ubicación 1
 
         const location2 = data
           .filter((item) => item.location === "ubicacion 2")
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-          .slice(0, 5); // Últimas 5 lecturas de ubicación 2
+          .slice(0, 10); // Últimas 10 lecturas de ubicación 2
 
         setLocation1Data(location1);
         setLocation2Data(location2);
