@@ -24,33 +24,29 @@ export default function Home() {
       }
       const data: HumidityData[] = await response.json();
 
-      // Ordenar los datos por timestamp descendente
       const sortedData = data.sort(
         (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
 
-      // Dividir las lecturas por ubicación
       const location1 = sortedData
         .filter((item) => item.location === "ubicacion 1")
-        .slice(0, 2); // Últimas 2 lecturas ubicación 1
+        .slice(0, 2);
       const location2 = sortedData
         .filter((item) => item.location === "ubicacion 2")
-        .slice(0, 2); // Últimas 2 lecturas ubicación 2
+        .slice(0, 2);
 
       setLocation1Data(location1);
       setLocation2Data(location2);
 
-      // Calcular promedio global usando los últimos dos registros generales
-      const lastTwoReadings = sortedData.slice(0, 2); // Tomar los últimos dos elementos de toda la base de datos
+      const lastTwoReadings = sortedData.slice(0, 2);
       if (lastTwoReadings.length === 2) {
-        const totalHumidity = lastTwoReadings.reduce((sum, item) => {
-          const value = Number(item.humidity_value); // Asegurarse de convertir el valor a número
-          return sum + (isNaN(value) ? 0 : value); // Sumar solo si el valor es válido
-        }, 0);
+        const totalHumidity = lastTwoReadings.reduce(
+          (sum, item) => sum + Number(item.humidity_value),
+          0
+        );
         const average = totalHumidity / lastTwoReadings.length;
         setAverageHumidity(average);
 
-        // Determinar la calidad de juego
         if (average <= 20) {
           setQuality("Buena");
           setFootwear("FG");
@@ -65,13 +61,13 @@ export default function Home() {
           setFootwear("FS");
         }
       } else {
-        setAverageHumidity(null); // En caso de que haya menos de 2 registros
+        setAverageHumidity(null);
         setQuality("No disponible");
         setFootwear("No disponible");
       }
     } catch (error) {
       console.error("Error:", error);
-      setAverageHumidity(null); // Si ocurre un error, asegurarse de mostrar null
+      setAverageHumidity(null);
       setQuality("No disponible");
       setFootwear("No disponible");
     }
@@ -80,7 +76,6 @@ export default function Home() {
   useEffect(() => {
     fetchData();
 
-    // Configurar la actualización automática cada 5 segundos
     const interval = setInterval(() => {
       fetchData();
     }, 5000);
@@ -100,35 +95,32 @@ export default function Home() {
   };
 
   const renderTable = (data: HumidityData[], title: string) => (
-    <div className="overflow-x-auto mb-6">
-      <h2 className="text-xl font-bold text-center text-white mb-4">{title}</h2>
-      <table className="table-auto w-full bg-gray-900 text-white border border-gray-700">
+    <div className="overflow-x-auto mb-6 shadow-lg rounded-md">
+      <h2 className="text-xl font-bold text-center text-gray-800 bg-gray-200 py-2">{title}</h2>
+      <table className="table-auto w-full bg-white text-gray-800 border border-gray-300">
         <thead>
-          <tr>
-            <th className="border border-gray-700 px-4 py-2 text-gray-300">ID</th>
-            <th className="border border-gray-700 px-4 py-2 text-gray-300">Timestamp</th>
-            <th className="border border-gray-700 px-4 py-2 text-gray-300">Humedad</th>
-            <th className="border border-gray-700 px-4 py-2 text-gray-300">Ubicación</th>
+          <tr className="bg-gray-100">
+            <th className="border border-gray-300 px-4 py-2">ID</th>
+            <th className="border border-gray-300 px-4 py-2">Timestamp</th>
+            <th className="border border-gray-300 px-4 py-2">Humedad</th>
+            <th className="border border-gray-300 px-4 py-2">Ubicación</th>
           </tr>
         </thead>
         <tbody>
           {data.length > 0 ? (
             data.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-700">
-                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.id}</td>
-                <td className="border border-gray-700 px-4 py-2 text-gray-200">
+              <tr key={item.id} className="hover:bg-gray-100">
+                <td className="border border-gray-300 px-4 py-2 text-center">{item.id}</td>
+                <td className="border border-gray-300 px-4 py-2 text-center">
                   {formatTimestamp(item.timestamp)}
                 </td>
-                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.humidity_value}</td>
-                <td className="border border-gray-700 px-4 py-2 text-gray-200">{item.location}</td>
+                <td className="border border-gray-300 px-4 py-2 text-center">{item.humidity_value}</td>
+                <td className="border border-gray-300 px-4 py-2 text-center">{item.location}</td>
               </tr>
             ))
           ) : (
             <tr>
-              <td
-                colSpan={4}
-                className="text-center border border-gray-700 px-4 py-2 text-gray-400"
-              >
+              <td colSpan={4} className="text-center border border-gray-300 px-4 py-2 text-gray-500">
                 No hay datos disponibles
               </td>
             </tr>
@@ -139,35 +131,31 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-800 p-4 sm:p-8">
-      <h1 className="text-2xl sm:text-3xl font-bold text-center text-white mb-6">
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
+      <h1 className="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-6">
         Últimas Lecturas de Humedad
       </h1>
 
-      {/* Tablas de ubicación */}
       {renderTable(location1Data, "Lecturas Ubicación 1")}
       {renderTable(location2Data, "Lecturas Ubicación 2")}
 
-      {/* Cuadro de promedio */}
-      <div className="mt-6 p-4 bg-gray-900 text-white rounded-md">
-        <h2 className="text-lg font-bold mb-2">Promedio de Humedad</h2>
-        {averageHumidity !== null ? (
-          <p className="text-xl font-semibold">{averageHumidity.toFixed(2)}%</p>
-        ) : (
-          <p>No hay datos suficientes para calcular el promedio.</p>
-        )}
-      </div>
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="p-4 bg-white shadow-lg rounded-md text-center">
+          <h2 className="text-lg font-bold mb-2">Promedio de Humedad</h2>
+          <p className="text-xl font-semibold text-gray-700">
+            {averageHumidity !== null ? `${averageHumidity.toFixed(2)}%` : "No disponible"}
+          </p>
+        </div>
 
-      {/* Cuadro de calidad */}
-      <div className="mt-6 p-4 bg-gray-900 text-white rounded-md">
-        <h2 className="text-lg font-bold mb-2">Calidad de Juego</h2>
-        <p className="text-xl font-semibold">{quality}</p>
-      </div>
+        <div className="p-4 bg-white shadow-lg rounded-md text-center">
+          <h2 className="text-lg font-bold mb-2">Calidad de Juego</h2>
+          <p className="text-xl font-semibold text-gray-700">{quality}</p>
+        </div>
 
-      {/* Cuadro de calzado */}
-      <div className="mt-6 p-4 bg-gray-900 text-white rounded-md">
-        <h2 className="text-lg font-bold mb-2">Tipo de Calzado</h2>
-        <p className="text-xl font-semibold">{footwear}</p>
+        <div className="p-4 bg-white shadow-lg rounded-md text-center">
+          <h2 className="text-lg font-bold mb-2">Tipo de Calzado</h2>
+          <p className="text-xl font-semibold text-gray-700">{footwear}</p>
+        </div>
       </div>
     </div>
   );
