@@ -15,84 +15,87 @@ export default function Home() {
   const [averageHumidity, setAverageHumidity] = useState<string>("No disponible");
   const [quality, setQuality] = useState<string>("No disponible");
 
-  const fetchData = () => {
-    fetch("/api/sensors")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Error al obtener los datos");
-        }
-        return response.json();
-      })
-      .then((data: HumidityData[]) => {
-        console.log("Datos recibidos desde la API:", data);
+  const fetchData = async () => {
+    try {
+      const response = await fetch("/api/sensors");
+      if (!response.ok) {
+        throw new Error("Error al obtener los datos");
+      }
+      const data: HumidityData[] = await response.json();
 
-        if (!Array.isArray(data) || data.length === 0) {
-          console.warn("Datos no disponibles o no válidos");
-          setAverageHumidity("No disponible");
-          setQuality("No disponible");
-          return;
-        }
+      console.log("Datos recibidos desde la API:", data);
 
-        // Filtrar solo datos válidos
-        const validData = data.filter(
-          (item) => item.humidity_value !== null && !isNaN(item.humidity_value)
-        );
-
-        if (validData.length === 0) {
-          console.warn("No se encontraron datos válidos");
-          setAverageHumidity("No disponible");
-          setQuality("No disponible");
-          return;
-        }
-
-        // Ordenar datos por timestamp
-        const sortedData = validData.sort(
-          (a, b) =>
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
-
-        // Obtener las últimas dos lecturas
-        const lastTwo = sortedData.slice(0, 2);
-
-        if (lastTwo.length === 2) {
-          const validValues = lastTwo.map((item) => item.humidity_value || 0);
-          const average =
-            validValues.reduce((sum, value) => sum + value, 0) /
-            validValues.length;
-
-          setAverageHumidity(`${average.toFixed(2)}%`);
-
-          // Determinar calidad de juego
-          if (average <= 20) {
-            setQuality("Buena");
-          } else if (average <= 40) {
-            setQuality("Normal");
-          } else if (average <= 60) {
-            setQuality("Mala");
-          } else {
-            setQuality("Pésima");
-          }
-        } else {
-          setAverageHumidity("No disponible");
-          setQuality("No disponible");
-        }
-
-        // Filtrar datos por ubicación
-        const location1 = sortedData
-          .filter((item) => item.location === "ubicacion 1")
-          .slice(0, 2);
-        const location2 = sortedData
-          .filter((item) => item.location === "ubicacion 2")
-          .slice(0, 2);
-
-        setLocation1Data(location1);
-        setLocation2Data(location2);
-      })
-      .catch((error) => {
-        console.error("Error al procesar los datos:", error);
+      if (!Array.isArray(data) || data.length === 0) {
+        console.warn("Datos no disponibles o no válidos");
         setAverageHumidity("No disponible");
         setQuality("No disponible");
-      });
+        return;
+      }
+
+      // Filtrar datos válidos
+      const validData = data.filter(
+        (item) => item.humidity_value !== null && !isNaN(item.humidity_value)
+      );
+
+      console.log("Datos válidos después de filtrar:", validData);
+
+      if (validData.length === 0) {
+        console.warn("No se encontraron datos válidos");
+        setAverageHumidity("No disponible");
+        setQuality("No disponible");
+        return;
+      }
+
+      // Ordenar datos por timestamp
+      const sortedData = validData.sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+
+      console.log("Datos ordenados:", sortedData);
+
+      // Obtener las últimas dos lecturas
+      const lastTwo = sortedData.slice(0, 2);
+
+      console.log("Últimas dos lecturas:", lastTwo);
+
+      if (lastTwo.length === 2) {
+        const validValues = lastTwo.map((item) => item.humidity_value || 0);
+        const average =
+          validValues.reduce((sum, value) => sum + value, 0) / validValues.length;
+
+        setAverageHumidity(`${average.toFixed(2)}%`);
+
+        // Determinar calidad de juego
+        if (average <= 20) {
+          setQuality("Buena");
+        } else if (average <= 40) {
+          setQuality("Normal");
+        } else if (average <= 60) {
+          setQuality("Mala");
+        } else {
+          setQuality("Pésima");
+        }
+      } else {
+        setAverageHumidity("No disponible");
+        setQuality("No disponible");
+      }
+
+      // Filtrar datos por ubicación
+      const location1 = sortedData
+        .filter((item) => item.location === "ubicacion 1")
+        .slice(0, 2);
+      const location2 = sortedData
+        .filter((item) => item.location === "ubicacion 2")
+        .slice(0, 2);
+
+      setLocation1Data(location1);
+      setLocation2Data(location2);
+    } catch (error) {
+      console.error("Error al procesar los datos:", error);
+      setAverageHumidity("No disponible");
+      setQuality("No disponible");
+    }
   };
 
   useEffect(() => {
