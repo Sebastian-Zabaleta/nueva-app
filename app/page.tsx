@@ -9,12 +9,19 @@ interface HumidityData {
   location: string;
 }
 
+interface WeatherData {
+  temperature: number;
+  description: string;
+  icon: string;
+}
+
 export default function Home() {
   const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
   const [averageHumidity, setAverageHumidity] = useState<number | null>(null);
   const [quality, setQuality] = useState<string>("No disponible");
   const [footwear, setFootwear] = useState<string>("No disponible");
+  const [weather, setWeather] = useState<WeatherData | null>(null);
 
   const fetchData = async () => {
     try {
@@ -73,12 +80,37 @@ export default function Home() {
     }
   };
 
+  const fetchWeather = async () => {
+    try {
+      const apiKey = "TU_API_KEY"; // Reemplaza con tu API Key de OpenWeatherMap
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=Fusagasuga,CO&appid=${apiKey}&units=metric`
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al obtener los datos del clima");
+      }
+
+      const data = await response.json();
+
+      setWeather({
+        temperature: data.main.temp,
+        description: data.weather[0].description,
+        icon: `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`,
+      });
+    } catch (error) {
+      console.error("Error al obtener el clima:", error);
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    fetchWeather();
 
     const interval = setInterval(() => {
       fetchData();
-    }, 5000);
+      fetchWeather();
+    }, 600000); // Actualiza cada 10 minutos
 
     return () => clearInterval(interval);
   }, []);
@@ -162,6 +194,25 @@ export default function Home() {
           <h2 className="text-lg font-bold mb-2">Tipo de Calzado</h2>
           <p className="text-xl font-semibold">{footwear}</p>
         </div>
+      </div>
+
+      {/* Información del Clima */}
+      <div className="mt-6 p-4 bg-green-700 shadow-lg rounded-md text-center">
+        <h2 className="text-lg font-bold mb-2">Clima en Fusagasugá</h2>
+        {weather ? (
+          <div>
+            <p className="text-xl font-semibold">
+              {weather.temperature}°C - {weather.description}
+            </p>
+            <img
+              src={weather.icon}
+              alt="Icono del clima"
+              className="mx-auto mt-2"
+            />
+          </div>
+        ) : (
+          <p>Cargando datos del clima...</p>
+        )}
       </div>
     </div>
   );
