@@ -40,22 +40,28 @@ export default function Home() {
         setLocation1Data(location1);
         setLocation2Data(location2);
 
-        // Calcular el promedio de las lecturas más recientes de ambas ubicaciones
+        // Calcular el promedio de las últimas 5 lecturas de ambas ubicaciones
         if (location1.length > 0 && location2.length > 0) {
-          const averageHumidity =
-            (location1[0].humidity_value + location2[0].humidity_value) / 2;
+          const averageHumidity1 =
+            location1.reduce((sum, item) => sum + item.humidity_value, 0) /
+            location1.length;
+          const averageHumidity2 =
+            location2.reduce((sum, item) => sum + item.humidity_value, 0) /
+            location2.length;
+
+          const overallAverage = (averageHumidity1 + averageHumidity2) / 2;
 
           // Establecer sugerencia basada en el promedio
-          if (averageHumidity < 20) {
+          if (overallAverage < 20) {
             setSuggestion("FG (Firm Ground)");
-          } else if (averageHumidity >= 20 && averageHumidity < 40) {
+          } else if (overallAverage >= 20 && overallAverage < 40) {
             setSuggestion("FS (Soft Ground)");
           } else {
-            setSuggestion("FS (Soft Ground)"); // Por defecto, FS para >40%
+            setSuggestion("FS (Soft Ground)");
           }
 
           // Establecer aptitud para jugar
-          setPlayability(averageHumidity > 40 ? "No apto para jugar" : "Apto para jugar");
+          setPlayability(overallAverage > 40 ? "No apto para jugar" : "Apto para jugar");
         }
       })
       .catch((error) => console.error("Error:", error));
