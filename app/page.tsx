@@ -21,6 +21,11 @@ interface RainForecast {
   rainProbability: number; // Precipitación pronosticada
 }
 
+interface ForecastItem {
+  dt: number;
+  rain?: { "3h"?: number };
+}
+
 const WeatherInfo = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [rainForecast, setRainForecast] = useState<RainForecast | null>(null);
@@ -50,7 +55,9 @@ const WeatherInfo = () => {
       }
 
       const forecastData = await forecastResponse.json();
-      const rainPrediction = forecastData.list.find((item: any) => item.rain && item.rain["3h"]);
+      const rainPrediction = forecastData.list.find(
+        (item: ForecastItem) => item.rain && item.rain["3h"]
+      );
 
       if (rainPrediction) {
         setRainForecast({
@@ -58,7 +65,7 @@ const WeatherInfo = () => {
             hour: "2-digit",
             minute: "2-digit",
           }),
-          rainProbability: rainPrediction.rain["3h"], // Precipitación acumulada en las próximas 3 horas
+          rainProbability: rainPrediction.rain?.["3h"] ?? 0, // Precipitación acumulada en las próximas 3 horas
         });
       }
     } catch (err) {
