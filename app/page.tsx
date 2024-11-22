@@ -154,6 +154,26 @@ const WeatherInfo = () => {
   );
 };
 
+const ShareButton = () => {
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href).then(
+      () => alert("Enlace copiado al portapapeles."),
+      () => alert("Error al copiar el enlace.")
+    );
+  };
+
+  return (
+    <div className="mt-6 text-center">
+      <button
+        onClick={handleShare}
+        className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-md shadow-md"
+      >
+        Compartir
+      </button>
+    </div>
+  );
+};
+
 export default function Home() {
   const [location1Data, setLocation1Data] = useState<HumidityData[]>([]);
   const [location2Data, setLocation2Data] = useState<HumidityData[]>([]);
@@ -310,6 +330,8 @@ export default function Home() {
       </div>
 
       <WeatherInfo />
+
+      <ShareButton />
     </div>
   );
 }
