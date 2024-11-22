@@ -157,7 +157,7 @@ const WeatherInfo = () => {
 const ShareButton = () => {
   const shareLink = () => {
     const whatsappLink = `https://wa.me/?text=${encodeURIComponent(
-      "Visita esta página: " + window.location.href
+      "Este es el estado actual de la cancha de futbol de la UDEC, visita el link para más información: " + window.location.href
     )}`;
     window.open(whatsappLink, "_blank");
   };
