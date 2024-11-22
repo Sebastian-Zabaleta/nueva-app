@@ -155,20 +155,20 @@ const WeatherInfo = () => {
 };
 
 const ShareButton = () => {
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href).then(
-      () => alert("Enlace copiado al portapapeles."),
-      () => alert("Error al copiar el enlace.")
-    );
+  const shareLink = () => {
+    const whatsappLink = `https://wa.me/?text=${encodeURIComponent(
+      "Visita esta página: " + window.location.href
+    )}`;
+    window.open(whatsappLink, "_blank");
   };
 
   return (
-    <div className="mt-6 text-center">
+    <div className="text-center mt-6">
       <button
-        onClick={handleShare}
-        className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-md shadow-md"
+        onClick={shareLink}
+        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md shadow-md"
       >
-        Compartir
+        Compartir en WhatsApp
       </button>
     </div>
   );
@@ -330,7 +330,6 @@ export default function Home() {
       </div>
 
       <WeatherInfo />
-
       <ShareButton />
     </div>
   );
