@@ -33,7 +33,6 @@ const WeatherInfo = () => {
 
   const fetchWeather = async () => {
     try {
-      // Clima actual
       const weatherResponse = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=Fusagasuga&units=metric&appid=632aeff1481ee21399f979345e174e87`
       );
@@ -45,7 +44,6 @@ const WeatherInfo = () => {
       const weatherData = await weatherResponse.json();
       setWeatherData(weatherData);
 
-      // Pronóstico de lluvia
       const forecastResponse = await fetch(
         `https://api.openweathermap.org/data/2.5/forecast?q=Fusagasuga&units=metric&appid=632aeff1481ee21399f979345e174e87`
       );
@@ -65,7 +63,7 @@ const WeatherInfo = () => {
             hour: "2-digit",
             minute: "2-digit",
           }),
-          rainProbability: rainPrediction.rain?.["3h"] ?? 0, // Precipitación acumulada en las próximas 3 horas
+          rainProbability: rainPrediction.rain?.["3h"] ?? 0,
         });
       }
     } catch (err) {
